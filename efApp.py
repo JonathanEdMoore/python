@@ -43,7 +43,7 @@ def minimizeVariance(meanReturns, covMatrix, constraintSet=(0, 1)):
     "Minimize the portfolio variance by altering the weights/allocation of assets in the portfolio"
     numAssets = len(meanReturns)
     args = (meanReturns, covMatrix)
-    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    constraints = ({'type': 'ineq', 'fun': lambda x: np.sum(x) - 1})
     bound = constraintSet
     bounds = tuple(bound for asset in range(numAssets))
     result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
@@ -69,13 +69,52 @@ def efficientOpt(meanReturns, covMatrix, returnTarget, constraintSet=(0, 1)):
     args = (meanReturns, covMatrix)
 
     constraints = ({'type': 'eq', 'fun': lambda x: portfolioReturn(x, meanReturns, covMatrix) - returnTarget},
-                   {'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+                   {'type': 'ineq', 'fun': lambda x: np.sum(x) - 1},
+                   {'type': 'ineq', 'fun': lambda x: 2 - np.sum(x)})
     bound = constraintSet
     bounds = tuple(bound for asset in range(numAssets))
     effOpt = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
                          method='SLSQP', bounds=bounds, constraints=constraints)
 
     return effOpt
+
+def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
+    weights = np.zeros(len(meanReturns))
+    weights[meanReturns.index.get_loc(stock)] = 1
+    return portfolioPerformance(weights, meanReturns, covMatrix)[1]
+
+def risk_parity_portfolio(meanReturns, covMatrix, targetVolatility, riskFreeRate=0.0529):
+    # Calculate the tangency portfolio (max Sharpe Ratio)
+    maxSR_Portfolio = maxSR(meanReturns, covMatrix, riskFreeRate)
+    maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix)
+    
+    # Find the portfolio on the CML that matches the target volatility
+    # CML equation: y = riskFreeRate + (maxSR_returns - riskFreeRate) / maxSR_std * x
+    # Rearrange to find x (the return corresponding to the target volatility)
+    targetReturn = riskFreeRate + (maxSR_returns - riskFreeRate) / maxSR_std * targetVolatility
+    
+    # Optimize portfolio to match target return with the same volatility
+    result = efficientOpt(meanReturns, covMatrix, targetReturn, constraintSet=(0, 1))
+    weights = result['x']
+    
+    # Calculate the portfolio performance metrics
+    rp_returns, rp_volatility = portfolioPerformance(weights, meanReturns, covMatrix)
+    rp_sharpe = (rp_returns - riskFreeRate) / rp_volatility
+    
+    # Print the portfolio weights
+    allocation = pd.DataFrame(weights, index=meanReturns.index, columns=['allocation'])
+    allocation.allocation = [round(i * 100, 2) for i in allocation.allocation]
+    
+    print(f"Risk Parity Portfolio Weights for target volatility ({targetVolatility * 100:.2f}%):")
+    for stock, weight in zip(meanReturns.index, weights):
+        print(f"{stock}: {weight:.4f}")
+    
+    # Print the returns, volatility, and Sharpe ratio
+    print(f"Annualized Return of the Risk Parity Portfolio: {rp_returns * 100:.2f}%")
+    print(f"Annualized Volatility of the Risk Parity Portfolio: {rp_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the Risk Parity Portfolio: {rp_sharpe:.4f}")
+    
+    return weights
 
 def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
@@ -86,6 +125,11 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
     maxSR_allocation = pd.DataFrame(maxSR_Portfolio['x'], index=meanReturns.index, columns=['allocation'])
     maxSR_allocation.allocation = [round(i * 100, 0) for i in maxSR_allocation.allocation]
 
+    # Calculate the volatility of 100% VT portfolio
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+
+    # Find and print the risk parity portfolio with the same volatility as 100% VT
+    weights = risk_parity_portfolio(meanReturns, covMatrix, vt_volatility)
     # Calculate Sharpe Ratio
     maxSR_sharpe = (maxSR_returns - riskFreeRate) / maxSR_std
 
