@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # Import data
 def get_data(stocks, start, end):
     stock_data = yf.download(stocks, start=start, end=end)
-    stock_data = stock_data['Close']
+    stock_data = stock_data['Adj Close']
 
     returns = stock_data.pct_change()
     meanReturns = returns.mean()
@@ -116,7 +116,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
 
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
 
