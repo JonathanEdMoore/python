@@ -114,6 +114,20 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
 
+    def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
+        weights = np.zeros(len(meanReturns))
+        weights[meanReturns.index.get_loc(stock)] = 1
+        return portfolioPerformance(weights, meanReturns, covMatrix)[1]
+
+    def cmlReturn(targetVolatility, riskFreeRate, tangencySharpeRatio):
+        """Calculate the return along the Capital Market Line (CML) for a given target volatility"""
+        # Calculate the return on the CML
+        return riskFreeRate + tangencySharpeRatio * targetVolatility
+    
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+
+    cmlReturn(vt_volatility, riskFreeRate, maxSR_sharpe)
+
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
 
 def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
@@ -182,3 +196,14 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
 
 
 EF_graph(meanReturns, covMatrix)
+
+# vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+# risk_free_rate = 0.0529
+
+# maxSR_Portfolio = maxSR(meanReturns, covMatrix, risk_free_rate)
+# maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix)
+
+# tangencySharpeRatio = (maxSR_returns - risk_free_rate) / maxSR_std
+
+# print(cmlReturn(vt_volatility, risk_free_rate, tangencySharpeRatio))
+
