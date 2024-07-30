@@ -126,11 +126,49 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
     
     vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
 
-    cmlReturn(vt_volatility, riskFreeRate, maxSR_sharpe)
+    cml_return = cmlReturn(vt_volatility, riskFreeRate, maxSR_sharpe)
+
+    # Optimization to match target volatility and return
+    def match_vol_return(meanReturns, covMatrix, targetVolatility, targetReturn):
+        numAssets = len(meanReturns)
+    
+        # Objective function: minimize the difference between portfolio volatility and target volatility
+        def objective(weights):
+          return np.abs(portfolioVariance(weights, meanReturns, covMatrix) - targetVolatility)
+    
+        # Constraints
+        constraints = [
+          {'type': 'eq', 'fun': lambda x: portfolioReturn(x, meanReturns, covMatrix) - targetReturn}
+        ]
+    
+        # Bounds (optional)
+        bounds = [(None, None) for _ in range(numAssets)]
+    
+        # Optimization
+        result = sc.minimize(objective, numAssets * [1. / numAssets],
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    
+        if result.success:
+          return result.x
+        else:
+          raise ValueError("Optimization failed to find a solution that matches the target volatility and return.")
+    
+    # Find portfolio weights that match the target volatility and return
+    weights = match_vol_return(meanReturns, covMatrix, vt_volatility, cml_return)
+    portfolio_ret, portfolio_vol = portfolioPerformance(weights, meanReturns, covMatrix)
+    portfolio_sharpe = (portfolio_ret - riskFreeRate) / portfolio_vol
+    
+    print("Portfolio Weights to match target volatility and return:")
+    for stock, weight in zip(meanReturns.index, weights):
+      print(f"{stock}: {weight:.4f}")
+
+    print(f"Targeted Annualized Return: {portfolio_ret * 100:.2f}%")
+    print(f"Targeted Annualized Volatility: {portfolio_vol * 100:.2f}%")
+    print(f"Targeted Sharpe Ratio: {portfolio_sharpe:.4f}")
 
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0229, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
 
@@ -194,16 +232,4 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
     fig = go.Figure(data=data, layout=layout)
     return fig.show()
 
-
 EF_graph(meanReturns, covMatrix)
-
-# vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
-# risk_free_rate = 0.0529
-
-# maxSR_Portfolio = maxSR(meanReturns, covMatrix, risk_free_rate)
-# maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix)
-
-# tangencySharpeRatio = (maxSR_returns - risk_free_rate) / maxSR_std
-
-# print(cmlReturn(vt_volatility, risk_free_rate, tangencySharpeRatio))
-
