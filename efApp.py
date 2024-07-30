@@ -116,7 +116,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
 
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
 
@@ -158,12 +158,15 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1))
         line=dict(color='blue', width=2, dash='dash')
     )
 
+    x_max = maxSR_std * 2
+    y_max = maxSR_returns * 2
+
     data = [MaxSharpeRatio, MinVol, EF_curve, CML]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
-        yaxis=dict(title='Annualized Return (%)'),
-        xaxis=dict(title='Annualized Volatility (%)'),
+        yaxis=dict(title='Annualized Return (%)', range=[0, y_max]),
+        xaxis=dict(title='Annualized Volatility (%)', range=[0, x_max]),
         showlegend=True,
         legend=dict(
             x=0.75, y=0, traceorder='normal',
