@@ -148,7 +148,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
     )
 
     # Tangency Line (Capital Market Line)
-    CML_x = np.linspace(0, max(efficientList) * 100, 100)
+    CML_x = np.linspace(0, 100, 500)  # Adjusted to extend the CML
     CML_y = riskFreeRate * 100 + (maxSR_returns - riskFreeRate * 100) / maxSR_std * CML_x
     CML = go.Scatter(
         name='Capital Market Line (CML)',
@@ -176,5 +176,6 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
 
     fig = go.Figure(data=data, layout=layout)
     return fig.show()
+
 
 EF_graph(meanReturns, covMatrix)
