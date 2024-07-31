@@ -219,7 +219,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
 
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, portfolio_ret_v, portfolio_vol_v, portfolio_ret_r, portfolio_vol_r, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, portfolio_ret_v, portfolio_vol_v, portfolio_ret_r, portfolio_vol_r, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
 
