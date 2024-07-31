@@ -214,11 +214,14 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
     print(f"Targeted Annualized Volatility: {portfolio_vol_r * 100:.2f}%")
     print(f"Targeted Sharpe Ratio: {portfolio_sharpe_r:.4f}")
 
-    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
+    portfolio_ret_v, portfolio_vol_v = round(portfolio_ret_v * 100, 2), round(portfolio_vol_v * 100, 2)
+    portfolio_ret_r, portfolio_vol_r = round(portfolio_ret_r * 100, 2), round(portfolio_vol_r * 100, 2)
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1)):
+    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, portfolio_ret_v, portfolio_vol_v, portfolio_ret_r, portfolio_vol_r, efficientList, targetReturns
+
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
+    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, portfolio_ret_v, portfolio_vol_v, portfolio_ret_r, portfolio_vol_r, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
 
     # Max SR
     MaxSharpeRatio = go.Scatter(
@@ -236,6 +239,24 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1))
         x=[minVol_std],
         y=[minVol_returns],
         marker=dict(color='green', size=14, line=dict(width=3, color='black'))
+    )
+
+    # CML 100% VT Volatility
+    VolMatch = go.Scatter(
+        name='CML Portfolio Matching All Stock Volatility',
+        mode='markers',
+        x=[portfolio_vol_v],
+        y=[portfolio_ret_v],
+        marker=dict(color='yellow', size=14, line=dict(width=3, color='black'))
+    )
+
+    # CML 100% VT Return
+    RetMatch = go.Scatter(
+        name='CML Portfolio Matching All Stock Returns',
+        mode='markers',
+        x=[portfolio_vol_r],
+        y=[portfolio_ret_r],
+        marker=dict(color='purple', size=14, line=dict(width=3, color='black'))
     )
 
     # Efficient Frontier
@@ -258,10 +279,10 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.00529, constraintSet=(0, 1))
         line=dict(color='blue', width=2, dash='dash')
     )
 
-    x_max = maxSR_std * 2
-    y_max = maxSR_returns * 2
+    x_max = portfolio_vol_v * 1.25
+    y_max = portfolio_ret_v * 1.25
 
-    data = [MaxSharpeRatio, MinVol, EF_curve, CML]
+    data = [MaxSharpeRatio, MinVol, EF_curve, CML, VolMatch, RetMatch]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
