@@ -234,8 +234,8 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, cons
             bgcolor='#E2E2E2',
             bordercolor='black',
             borderwidth=2),
-        width=800,
-        height=600
+        width=1250,
+        height=1250
     )
 
     fig = go.Figure(data=data, layout=layout)
