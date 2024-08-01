@@ -102,9 +102,42 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
         print(f"{stock}: {weight:.4f}")
 
     # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
-    print(f"Annualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
+    print(f"\nAnnualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
     print(f"Annualized Volatility of the Tangency Portfolio: {maxSR_std * 100:.2f}%")
     print(f"Sharpe Ratio of the Tangency Portfolio: {maxSR_sharpe:.4f}\n")
+
+    def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
+        weights = np.zeros(len(meanReturns))
+        weights[meanReturns.index.get_loc(stock)] = 1
+        return portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)[1]
+    
+    def calculate_single_stock_return(stock, meanReturns):
+        return meanReturns[stock] * 252  # Annualize the return
+    # 100% VT Portfolio
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+    vt_return = calculate_single_stock_return('VT', meanReturns)
+    vt_sharpe = (vt_return - riskFreeRate) / vt_volatility
+
+    # 100% BND Portfolio
+    bnd_volatility = calculate_single_stock_volatility('BND', meanReturns, covMatrix)
+    bnd_return = calculate_single_stock_return('BND', meanReturns)
+    bnd_sharpe = (bnd_return - riskFreeRate) / bnd_volatility
+
+    print("Portfolio Weights for 100% VT")
+    for stock, weight in zip(meanReturns.index, [0, 1]):
+        print(f"{stock}: {weight:.4f}")
+    
+    print(f"\nAnnualized Return of the VT Portfolio: {vt_return * 100:.2f}%")
+    print(f"Annualized Volatility of the VT Porfolio: {vt_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the VT Portfolio: {vt_sharpe:.4f}\n")
+
+    print("Portfolio Weights for 100% BND")
+    for stock, weight in zip(meanReturns.index, [1, 0]):
+        print(f"{stock}: {weight:.4f}")
+    
+    print(f"\nAnnualized Return of the BND Portfolio: {bnd_return * 100:.2f}%")
+    print(f"Annualized Volatility of the BND Portfolio: {bnd_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the BND Portfolio: {bnd_sharpe:.4f}\n")
 
     # Min Volatility Portfolio
     minVol_Portfolio = minimizeVariance(meanReturns, covMatrix)
@@ -114,57 +147,25 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
 
     # Efficient Frontier
     efficientList = []
-    targetReturns = np.linspace(minVol_returns, maxSR_returns, 20)
+    targetReturns = np.linspace(bnd_return, vt_return, 20)
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, target)['fun'])
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
 
-    def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
-        weights = np.zeros(len(meanReturns))
-        weights[meanReturns.index.get_loc(stock)] = 1
-        return portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)[1]
-    
-    def calculate_single_stock_return(stock, meanReturns):
-        return meanReturns[stock] * 252  # Annualize the return
-    
-    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
-    vt_return = calculate_single_stock_return('VT', meanReturns)
-    vt_sharpe = (vt_return - riskFreeRate) / vt_volatility
-
-    bnd_volatility = calculate_single_stock_volatility('BND', meanReturns, covMatrix)
-    bnd_return = calculate_single_stock_return('BND', meanReturns)
-    bnd_sharpe = (bnd_return - riskFreeRate) / bnd_volatility
-
-    print("Portfolio Weights for 100% VT")
-    for stock, weight in zip(meanReturns.index, [0, 1]):
-        print(f"{stock}: {weight:.4f}")
-    
-    print(f"VT Return: {vt_return * 100:.2f}%")
-    print(f"VT Volatility: {vt_volatility * 100:.2f}%")
-    print(f"VT Sharpe Ratio: {vt_sharpe:.4f}\n")
-
-    print("Portfolio Weights for 100% BND")
-    for stock, weight in zip(meanReturns.index, [1, 0]):
-        print(f"{stock}: {weight:.4f}")
-    
-    print(f"BND Return: {bnd_return * 100:.2f}%")
-    print(f"BND Volatility: {bnd_volatility * 100:.2f}%")
-    print(f"BND Sharpe Ratio: {bnd_sharpe:.4f}\n")
-
     vt_return, vt_volatility = round(vt_return * 100, 2), round(vt_volatility * 100, 2)
     bnd_return, bnd_volatility = round(bnd_return * 100, 2), round(bnd_volatility * 100, 2)
 
     return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.07, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
 
-    # Max SR
-    MaxSharpeRatio = go.Scatter(
-        name='Maximum Sharpe Ratio',
+    # Tangency Porfolio
+    TangencyPortfolio = go.Scatter(
+        name='Tangency Portfolio',
         mode='markers',
         x=[maxSR_std],
         y=[maxSR_returns],
@@ -186,7 +187,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.07, con
         mode='markers',
         x=[vt_volatility],
         y=[vt_return],
-        marker=dict(color='blue', size=14, line=dict(width=3, color='black'))
+        marker=dict(color='orange', size=14, line=dict(width=3, color='black'))
     )
 
     # 100% BND
@@ -195,7 +196,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.07, con
         mode='markers',
         x=[bnd_volatility],
         y=[bnd_return],
-        marker=dict(color='pink', size=14, line=dict(width=3, color='black'))
+        marker=dict(color='blue', size=14, line=dict(width=3, color='black'))
     )
 
     # Efficient Frontier
@@ -221,7 +222,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.07, con
     x_max = vt_volatility * 1.25
     y_max = vt_return * 1.25
 
-    data = [MaxSharpeRatio, MinVol, EF_curve, CML, Vt, Bnd]
+    data = [TangencyPortfolio, MinVol, EF_curve, CML, Vt, Bnd]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
