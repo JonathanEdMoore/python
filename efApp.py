@@ -57,7 +57,7 @@ def minimizeVariance(meanReturns, covMatrix, constraintSet=(0, 1)):
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
 
-stock_list = ['VT', 'BND']
+stock_list = ['VT', 'BNDW']
 stocks = [stock for stock in stock_list]
 
 end_date = dt.datetime.now()
@@ -145,9 +145,9 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     vt_sharpe = (vt_return - riskFreeRate) / vt_volatility
 
     # 100% BND Portfolio
-    bnd_volatility = calculate_single_stock_volatility('BND', meanReturns, covMatrix)
-    bnd_return = calculate_single_stock_return('BND', meanReturns)
-    bnd_sharpe = (bnd_return - riskFreeRate) / bnd_volatility
+    bndw_volatility = calculate_single_stock_volatility('BNDW', meanReturns, covMatrix)
+    bndw_return = calculate_single_stock_return('BNDW', meanReturns)
+    bndw_sharpe = (bndw_return - riskFreeRate) / bndw_volatility
 
     print("Portfolio Weights for 100% VT")
     for stock, weight in zip(meanReturns.index, [0, 1]):
@@ -157,13 +157,13 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     print(f"Annualized Volatility of the VT Porfolio: {vt_volatility * 100:.2f}%")
     print(f"Sharpe Ratio of the VT Portfolio: {vt_sharpe:.4f}\n")
 
-    print("Portfolio Weights for 100% BND")
+    print("Portfolio Weights for 100% BNDW")
     for stock, weight in zip(meanReturns.index, [1, 0]):
         print(f"{stock}: {weight:.4f}")
     
-    print(f"\nAnnualized Return of the BND Portfolio: {bnd_return * 100:.2f}%")
-    print(f"Annualized Volatility of the BND Portfolio: {bnd_volatility * 100:.2f}%")
-    print(f"Sharpe Ratio of the BND Portfolio: {bnd_sharpe:.4f}\n")
+    print(f"\nAnnualized Return of the BNDW Portfolio: {bndw_return * 100:.2f}%")
+    print(f"Annualized Volatility of the BNDW Portfolio: {bndw_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the BNDW Portfolio: {bndw_sharpe:.4f}\n")
 
     # Min Volatility Portfolio
     minVol_Portfolio = minimizeVariance(meanReturns, covMatrix)
@@ -173,7 +173,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
 
     # Efficient Frontier
     efficientList = []
-    targetReturns = np.linspace(bnd_return, vt_return, 20)
+    targetReturns = np.linspace(bndw_return, vt_return, 20)
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, target)['fun'])
     
@@ -226,16 +226,16 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
 
     vt_return, vt_volatility = round(vt_return * 100, 2), round(vt_volatility * 100, 2)
-    bnd_return, bnd_volatility = round(bnd_return * 100, 2), round(bnd_volatility * 100, 2)
+    bndw_return, bndw_volatility = round(bndw_return * 100, 2), round(bndw_volatility * 100, 2)
 
     target_returns_v, target_std_v= round(target_returns_v * 100, 2), round(target_std_v * 100, 2)
     target_returns_r, target_std_r= round(target_returns_r * 100, 2), round(target_std_r * 100, 2)
 
-    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns
+    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bndw_return, bndw_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, leverageCost=0.1375, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, leverageCost=0.0, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
+    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bndw_return, bndw_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
 
     # Tangency Porfolio
     TangencyPortfolio = go.Scatter(
@@ -268,8 +268,8 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, leverageCost=0.1375, c
     Bnd = go.Scatter(
         name='100% BND Portfolio',
         mode='markers',
-        x=[bnd_volatility],
-        y=[bnd_return],
+        x=[bndw_volatility],
+        y=[bndw_return],
         marker=dict(color='blue', size=14, line=dict(width=3, color='black'))
     )
 
