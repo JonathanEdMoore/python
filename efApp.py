@@ -150,6 +150,9 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     targetReturns = np.linspace(bnd_return, vt_return, 20)
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, target)['fun'])
+    
+    cml_return = (maxSR_sharpe * vt_volatility) + riskFreeRate
+    cml_volatility = (vt_return - riskFreeRate) / maxSR_sharpe
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
@@ -157,11 +160,13 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     vt_return, vt_volatility = round(vt_return * 100, 2), round(vt_volatility * 100, 2)
     bnd_return, bnd_volatility = round(bnd_return * 100, 2), round(bnd_volatility * 100, 2)
 
-    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, efficientList, targetReturns
+    cml_return, cml_volatility = round(cml_return * 100, 2), round(cml_volatility * 100, 2)
+
+    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, cml_return, cml_volatility, efficientList, targetReturns
 
 def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
+    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, cml_return, cml_volatility, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
 
     # Tangency Porfolio
     TangencyPortfolio = go.Scatter(
@@ -199,6 +204,24 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, cons
         marker=dict(color='blue', size=14, line=dict(width=3, color='black'))
     )
 
+    # Portfolio Matching 100% VT Volatility
+    Cml_Vt_Vol = go.Scatter(
+        name='Portfolio Matching 100% VT Volatility',
+        mode='markers',
+        x=[vt_volatility],
+        y=[cml_return],
+        marker=dict(color='purple', size=14, line=dict(width=3, color='black'))
+    )
+
+    # Portfolio Matching 100% VT Return
+    Cml_Vt_Ret = go.Scatter(
+        name='Portfolio Matching 100% VT Return',
+        mode='markers',
+        x=[cml_volatility],
+        y=[vt_return],
+        marker=dict(color='pink', size=14, line=dict(width=3, color='black'))
+    )
+
     # Efficient Frontier
     EF_curve = go.Scatter(
         name='Efficient Frontier',
@@ -222,7 +245,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, cons
     x_max = vt_volatility * 1.25
     y_max = vt_return * 1.25
 
-    data = [TangencyPortfolio, MinVol, EF_curve, CML, Vt, Bnd]
+    data = [TangencyPortfolio, MinVol, EF_curve, CML, Vt, Bnd, Cml_Vt_Vol, Cml_Vt_Ret]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
