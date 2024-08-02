@@ -186,6 +186,11 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     target_weights_v = pd.DataFrame(targetPortfolio_v['x'], index=meanReturns.index, columns=['allocation'])
     target_weights_v.allocation = [round(i * 100, 2) for i in target_weights_v.allocation]
 
+    if (target_sharpe_v <= vt_sharpe):
+        target_returns_v, target_std_v = vt_return, vt_volatility
+        target_sharpe_v = vt_sharpe
+        targetPortfolio_v['x'] = [0, 1]
+
     # Print the weights of the Portfolio Matching 100% Volatility
     print("Weights for Portfolio Matching 100% VT Volatility):")
     for stock, weight in zip(meanReturns.index, targetPortfolio_v['x']):
@@ -201,6 +206,11 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     target_sharpe_r = (target_returns_r - riskFreeRate) / target_std_r
     target_weights_r = pd.DataFrame(targetPortfolio_r['x'], index=meanReturns.index, columns=['allocation'])
     target_weights_r.allocation = [round(i * 100, 2) for i in target_weights_r.allocation]
+
+    if (target_sharpe_r <= vt_sharpe):
+        target_returns_r, target_std_r = vt_return, vt_volatility
+        target_sharpe_r = vt_sharpe
+        targetPortfolio_r['x'] = [0, 1]
 
     # Print the weights of the Portfolio Matching 100% Volatility
     print("Weights for Portfolio Matching 100% VT Returns):")
@@ -218,13 +228,14 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     vt_return, vt_volatility = round(vt_return * 100, 2), round(vt_volatility * 100, 2)
     bnd_return, bnd_volatility = round(bnd_return * 100, 2), round(bnd_volatility * 100, 2)
 
-    cml_return, cml_volatility = round(cml_return * 100, 2), round(cml_volatility * 100, 2)
+    target_returns_v, target_std_v= round(target_returns_v * 100, 2), round(target_std_v * 100, 2)
+    target_returns_r, target_std_r= round(target_returns_r * 100, 2), round(target_std_r * 100, 2)
 
-    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, cml_return, cml_volatility, efficientList, targetReturns
+    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.04, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, cml_return, cml_volatility, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
+    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bnd_return, bnd_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
 
     # Tangency Porfolio
     TangencyPortfolio = go.Scatter(
@@ -266,8 +277,8 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, cons
     Cml_Vt_Vol = go.Scatter(
         name='Portfolio Matching 100% VT Volatility',
         mode='markers',
-        x=[vt_volatility],
-        y=[cml_return],
+        x=[target_std_v],
+        y=[target_returns_v],
         marker=dict(color='purple', size=14, line=dict(width=3, color='black'))
     )
 
@@ -275,8 +286,8 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0241, leverageCost=0.0, cons
     Cml_Vt_Ret = go.Scatter(
         name='Portfolio Matching 100% VT Return',
         mode='markers',
-        x=[cml_volatility],
-        y=[vt_return],
+        x=[target_std_r],
+        y=[target_returns_r],
         marker=dict(color='pink', size=14, line=dict(width=3, color='black'))
     )
 
