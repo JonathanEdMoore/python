@@ -192,7 +192,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
         targetPortfolio_v['x'] = [0, 1]
 
     # Print the weights of the Portfolio Matching 100% Volatility
-    print("Weights for Portfolio Matching 100% VT Volatility):")
+    print("Weights for Portfolio Matching 100% VT Volatility:")
     for stock, weight in zip(meanReturns.index, targetPortfolio_v['x']):
         print(f"{stock}: {weight:.4f}")
 
@@ -213,7 +213,7 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
         targetPortfolio_r['x'] = [0, 1]
 
     # Print the weights of the Portfolio Matching 100% Volatility
-    print("Weights for Portfolio Matching 100% VT Returns):")
+    print("Weights for Portfolio Matching 100% VT Returns:")
     for stock, weight in zip(meanReturns.index, targetPortfolio_r['x']):
         print(f"{stock}: {weight:.4f}")
 
