@@ -84,6 +84,32 @@ def efficientOpt(meanReturns, covMatrix, returnTarget, constraintSet=(0, 1)):
 
     return effOpt
 
+def calculateTargetPortfolio_v(meanReturns, covMatrix, targetVolatility, cmlReturn, constraintSet=(0, 1)):
+    numAssets = len(meanReturns)
+    args = (meanReturns, covMatrix)
+
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolioPerformance(x, meanReturns, covMatrix)[1] - targetVolatility},
+                   {'type': 'eq', 'fun': lambda x: portfolioReturn(x, meanReturns, covMatrix) - cmlReturn})
+    
+    bound = constraintSet
+    bounds = tuple(bound for asset in range(numAssets))
+    result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    return result
+
+def calculateTargetPortfolio_r(meanReturns, covMatrix, targetReturns, cmlVolatility, constraintSet=(0, 1)):
+    numAssets = len(meanReturns)
+    args = (meanReturns, covMatrix)
+
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolioPerformance(x, meanReturns, covMatrix)[0] - targetReturns},
+                   {'type': 'eq', 'fun': lambda x: portfolioVariance(x, meanReturns, covMatrix) - cmlVolatility})
+    
+    bound = constraintSet
+    bounds = tuple(bound for asset in range(numAssets))
+    result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    return result
+
 def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
@@ -153,6 +179,38 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     
     cml_return = (maxSR_sharpe * vt_volatility) + riskFreeRate
     cml_volatility = (vt_return - riskFreeRate) / maxSR_sharpe
+
+    targetPortfolio_v = calculateTargetPortfolio_v(meanReturns, covMatrix, vt_volatility, cml_return, constraintSet)
+    target_returns_v, target_std_v = portfolioPerformance(targetPortfolio_v['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
+    target_sharpe_v = (target_returns_v - riskFreeRate) / target_std_v
+    target_weights_v = pd.DataFrame(targetPortfolio_v['x'], index=meanReturns.index, columns=['allocation'])
+    target_weights_v.allocation = [round(i * 100, 2) for i in target_weights_v.allocation]
+
+    # Print the weights of the Portfolio Matching 100% Volatility
+    print("Weights for Portfolio Matching 100% VT Volatility):")
+    for stock, weight in zip(meanReturns.index, targetPortfolio_v['x']):
+        print(f"{stock}: {weight:.4f}")
+
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
+    print(f"\nAnnualized Return of the Portfolio Matching 100% Volatility: {target_returns_v * 100:.2f}%")
+    print(f"Annualized Volatility of the Portfolio Matching 100% Volatility: {target_std_v * 100:.2f}%")
+    print(f"Sharpe Ratio of the Portfolio Matching 100% Volatility {target_sharpe_v:.4f}\n")
+
+    targetPortfolio_r = calculateTargetPortfolio_r(meanReturns, covMatrix, vt_return, cml_volatility, constraintSet)
+    target_returns_r, target_std_r = portfolioPerformance(targetPortfolio_r['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
+    target_sharpe_r = (target_returns_r - riskFreeRate) / target_std_r
+    target_weights_r = pd.DataFrame(targetPortfolio_r['x'], index=meanReturns.index, columns=['allocation'])
+    target_weights_r.allocation = [round(i * 100, 2) for i in target_weights_r.allocation]
+
+    # Print the weights of the Portfolio Matching 100% Volatility
+    print("Weights for Portfolio Matching 100% VT Returns):")
+    for stock, weight in zip(meanReturns.index, targetPortfolio_r['x']):
+        print(f"{stock}: {weight:.4f}")
+
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
+    print(f"\nAnnualized Return of the Portfolio Matching 100% Returns: {target_returns_r * 100:.2f}%")
+    print(f"Annualized Volatility of the Portfolio Matching 100% Returns: {target_std_r * 100:.2f}%")
+    print(f"Sharpe Ratio of the Portfolio Matching 100% Returns {target_sharpe_r:.4f}\n")
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
