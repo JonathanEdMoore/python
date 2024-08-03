@@ -264,9 +264,9 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0242, leverageCost=0.0, cons
         marker=dict(color='orange', size=14, line=dict(width=3, color='black'))
     )
 
-    # 100% BND
+    # 100% BNDW
     Bnd = go.Scatter(
-        name='100% BND Portfolio',
+        name='100% BNDW Portfolio',
         mode='markers',
         x=[bndw_volatility],
         y=[bndw_return],
@@ -314,7 +314,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0242, leverageCost=0.0, cons
     x_max = vt_volatility * 1.25
     y_max = vt_return * 1.25
 
-    data = [TangencyPortfolio, MinVol, EF_curve, CML, Vt, Bnd, Cml_Vt_Vol, Cml_Vt_Ret]
+    data = [EF_curve, CML, Vt, Bnd, Cml_Vt_Vol, Cml_Vt_Ret, MinVol, TangencyPortfolio]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
