@@ -42,6 +42,8 @@ def get_dividend_yield(tickers, period):
 
     # Convert dictionary to Pandas Series
     dividend_yield_series = pd.Series(dividend_yields, name='Dividend Yield')
+
+    dividend_yield_series.name = "Ticker"  # Set the name of the Series
     
     return dividend_yield_series
 
