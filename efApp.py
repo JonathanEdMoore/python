@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # Import data
 def get_data(stocks, start, end):
     stock_data = yf.download(stocks, start=start, end=end)
-    stock_data = stock_data['Close']
+    stock_data = stock_data['Adj Close']
 
     returns = stock_data.pct_change()
     meanReturns = returns.mean()
@@ -16,19 +16,57 @@ def get_data(stocks, start, end):
 
     return meanReturns, covMatrix
 
-def portfolioPerformance(weights, meanReturns, covMatrix):
-    returns = np.sum(meanReturns * weights) * 252
-    std = np.sqrt(np.dot(weights.T, np.dot(covMatrix, weights))) * np.sqrt(252)
-    return returns, std
+def get_dividend_yield(tickers, period):
+    dividend_yields = {}
 
-def negativeSR(weights, meanReturns, covMatrix, riskFreeRate=0):
-    pReturns, pStd = portfolioPerformance(weights, meanReturns, covMatrix)
+    for ticker in tickers:
+        # Fetch historical data for the stock
+        stock = yf.Ticker(ticker)
+        data = stock.history(period=period)
+
+        # Resample dividend data to get annual dividends
+        dividends = stock.dividends
+        annual_dividends = dividends.resample('YE').sum()  # Sum dividends per year
+
+        # Calculate average closing price per year
+        annual_prices = data['Close'].resample('YE').mean()
+
+        # Calculate annual dividend yields
+        annual_dividend_yields = annual_dividends / annual_prices
+
+        # Average annual dividend yield
+        average_dividend_yield = annual_dividend_yields.mean()
+
+        # Store the result in the dictionary
+        dividend_yields[ticker] = average_dividend_yield
+
+    # Convert dictionary to Pandas Series
+    dividend_yield_series = pd.Series(dividend_yields, name='Dividend Yield')
+
+    dividend_yield_series.name = "Ticker"  # Set the name of the Series
+    
+    return dividend_yield_series
+
+def portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
+    # Determine if leverage is used
+    leverage = np.sum(weights) - 1
+    # Apply leverage cost to the leveraged portion of the portfolio
+    if leverage > 0:
+        adjusted_returns = np.sum(meanReturns * weights) * 252 - leverage * leverageCost
+    else:
+        adjusted_returns = np.sum(meanReturns * weights) * 252
+    
+    std = np.sqrt(np.dot(weights.T, np.dot(covMatrix, weights))) * np.sqrt(252)
+    return adjusted_returns, std
+
+def negativeSR(weights, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
+    pReturns, pStd = portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)
     return -(pReturns - riskFreeRate) / pStd
 
-def maxSR(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 1)):
+def maxSR(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, constraintSet=(0, 1)):
     "Minimize the negative SR, by altering the weights of the portfolio"
     numAssets = len(meanReturns)
-    args = (meanReturns, covMatrix, riskFreeRate)
+    args = (meanReturns, covMatrix, riskFreeRate, leverageCost)
     constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
     bound = constraintSet
     bounds = tuple(bound for asset in range(numAssets))
@@ -50,16 +88,6 @@ def minimizeVariance(meanReturns, covMatrix, constraintSet=(0, 1)):
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
 
-stock_list = ['VT', 'BND']
-stocks = [stock for stock in stock_list]
-
-end_date = dt.datetime.now()
-
-end_date_str = end_date.strftime('%Y-%m-%d')
-start_date_str = '2007-04-03'
-
-meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
-
 def portfolioReturn(weights, meanReturns, covMatrix):
     return portfolioPerformance(weights, meanReturns, covMatrix)[0]
 
@@ -78,50 +106,46 @@ def efficientOpt(meanReturns, covMatrix, returnTarget, constraintSet=(0, 1)):
 
     return effOpt
 
-def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
-    weights = np.zeros(len(meanReturns))
-    weights[meanReturns.index.get_loc(stock)] = 1
-    return portfolioPerformance(weights, meanReturns, covMatrix)[1]
+def calculateTargetPortfolio_v(meanReturns, covMatrix, targetVolatility, cmlReturn, constraintSet=(0, 1)):
+    numAssets = len(meanReturns)
+    args = (meanReturns, covMatrix)
 
-def risk_parity_portfolio(meanReturns, covMatrix, targetVolatility, riskFreeRate=0.0529):
-    # Calculate the tangency portfolio (max Sharpe Ratio)
-    maxSR_Portfolio = maxSR(meanReturns, covMatrix, riskFreeRate)
-    maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix)
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolioPerformance(x, meanReturns, covMatrix)[1] - targetVolatility},
+                   {'type': 'eq', 'fun': lambda x: portfolioReturn(x, meanReturns, covMatrix) - cmlReturn})
     
-    # Find the portfolio on the CML that matches the target volatility
-    # CML equation: y = riskFreeRate + (maxSR_returns - riskFreeRate) / maxSR_std * x
-    # Rearrange to find x (the return corresponding to the target volatility)
-    targetReturn = riskFreeRate + (maxSR_returns - riskFreeRate) / maxSR_std * targetVolatility
-    
-    # Optimize portfolio to match target return with the same volatility
-    result = efficientOpt(meanReturns, covMatrix, targetReturn, constraintSet=(0, 1))
-    weights = result['x']
-    
-    # Calculate the portfolio performance metrics
-    rp_returns, rp_volatility = portfolioPerformance(weights, meanReturns, covMatrix)
-    rp_sharpe = (rp_returns - riskFreeRate) / rp_volatility
-    
-    # Print the portfolio weights
-    allocation = pd.DataFrame(weights, index=meanReturns.index, columns=['allocation'])
-    allocation.allocation = [round(i * 100, 2) for i in allocation.allocation]
-    
-    print(f"Risk Parity Portfolio Weights for target volatility ({targetVolatility * 100:.2f}%):")
-    for stock, weight in zip(meanReturns.index, weights):
-        print(f"{stock}: {weight:.4f}")
-    
-    # Print the returns, volatility, and Sharpe ratio
-    print(f"Annualized Return of the Risk Parity Portfolio: {rp_returns * 100:.2f}%")
-    print(f"Annualized Volatility of the Risk Parity Portfolio: {rp_volatility * 100:.2f}%")
-    print(f"Sharpe Ratio of the Risk Parity Portfolio: {rp_sharpe:.4f}")
-    
-    return weights
+    bound = constraintSet
+    bounds = tuple(bound for asset in range(numAssets))
+    result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    return result
 
-def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 1)):
+def calculateTargetPortfolio_r(meanReturns, covMatrix, targetReturns, cmlVolatility, constraintSet=(0, 1)):
+    numAssets = len(meanReturns)
+    args = (meanReturns, covMatrix)
+
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolioPerformance(x, meanReturns, covMatrix)[0] - targetReturns},
+                   {'type': 'eq', 'fun': lambda x: portfolioVariance(x, meanReturns, covMatrix) - cmlVolatility})
+    
+    bound = constraintSet
+    bounds = tuple(bound for asset in range(numAssets))
+    result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    return result
+
+def calculate_single_stock_volatility(stock, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
+        weights = np.zeros(len(meanReturns))
+        weights[meanReturns.index.get_loc(stock)] = 1
+        return portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)[1]
+
+def calculate_single_stock_return(stock, meanReturns):
+        return meanReturns[stock] * 252  # Annualize the return
+
+def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
     # Max Sharpe Ratio Portfolio
-    maxSR_Portfolio = maxSR(meanReturns, covMatrix, riskFreeRate)
-    maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix)
+    maxSR_Portfolio = maxSR(meanReturns, covMatrix, riskFreeRate, leverageCost)
+    maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
     maxSR_allocation = pd.DataFrame(maxSR_Portfolio['x'], index=meanReturns.index, columns=['allocation'])
     maxSR_allocation.allocation = [round(i * 100, 0) for i in maxSR_allocation.allocation]
 
@@ -138,35 +162,112 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, constraintSet=(0, 
     for stock, weight in zip(meanReturns.index, maxSR_Portfolio['x']):
         print(f"{stock}: {weight:.4f}")
 
-   # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
-    print(f"Annualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
+    print(f"\nAnnualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
     print(f"Annualized Volatility of the Tangency Portfolio: {maxSR_std * 100:.2f}%")
-    print(f"Sharpe Ratio of the Tangency Portfolio: {maxSR_sharpe:.4f}")
+    print(f"Sharpe Ratio of the Tangency Portfolio: {maxSR_sharpe:.4f}\n")
+    
+    # 100% VT Portfolio
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix, riskFreeRate, leverageCost)
+    vt_return = calculate_single_stock_return('VT', meanReturns)
+    vt_sharpe = (vt_return - riskFreeRate) / vt_volatility
+
+    # 100% BND Portfolio
+    bndw_volatility = calculate_single_stock_volatility('BNDW', meanReturns, covMatrix, riskFreeRate, leverageCost)
+    bndw_return = calculate_single_stock_return('BNDW', meanReturns)
+    bndw_sharpe = (bndw_return - riskFreeRate) / bndw_volatility
+
+    print("Portfolio Weights for 100% VT")
+    for stock, weight in zip(meanReturns.index, [0, 1]):
+        print(f"{stock}: {weight:.4f}")
+    
+    print(f"\nAnnualized Return of the VT Portfolio: {vt_return * 100:.2f}%")
+    print(f"Annualized Volatility of the VT Porfolio: {vt_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the VT Portfolio: {vt_sharpe:.4f}\n")
+
+    print("Portfolio Weights for 100% BNDW")
+    for stock, weight in zip(meanReturns.index, [1, 0]):
+        print(f"{stock}: {weight:.4f}")
+    
+    print(f"\nAnnualized Return of the BNDW Portfolio: {bndw_return * 100:.2f}%")
+    print(f"Annualized Volatility of the BNDW Portfolio: {bndw_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the BNDW Portfolio: {bndw_sharpe:.4f}\n")
 
     # Min Volatility Portfolio
     minVol_Portfolio = minimizeVariance(meanReturns, covMatrix)
-    minVol_returns, minVol_std = portfolioPerformance(minVol_Portfolio['x'], meanReturns, covMatrix)
+    minVol_returns, minVol_std = portfolioPerformance(minVol_Portfolio['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
     minVol_allocation = pd.DataFrame(minVol_Portfolio['x'], index=meanReturns.index, columns=['allocation'])
     minVol_allocation.allocation = [round(i * 100, 0) for i in minVol_allocation.allocation]
 
     # Efficient Frontier
     efficientList = []
-    targetReturns = np.linspace(minVol_returns, maxSR_returns, 20)
+    targetReturns = np.linspace(bndw_return, vt_return, 20)
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, target)['fun'])
+    
+    cml_return = (maxSR_sharpe * vt_volatility) + riskFreeRate
+    cml_volatility = (vt_return - riskFreeRate) / maxSR_sharpe
+
+    targetPortfolio_v = calculateTargetPortfolio_v(meanReturns, covMatrix, vt_volatility, cml_return, constraintSet)
+    target_returns_v, target_std_v = portfolioPerformance(targetPortfolio_v['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
+    target_sharpe_v = (target_returns_v - riskFreeRate) / target_std_v
+    target_weights_v = pd.DataFrame(targetPortfolio_v['x'], index=meanReturns.index, columns=['allocation'])
+    target_weights_v.allocation = [round(i * 100, 2) for i in target_weights_v.allocation]
+
+    if (target_sharpe_v <= vt_sharpe):
+        target_returns_v, target_std_v = vt_return, vt_volatility
+        target_sharpe_v = vt_sharpe
+        targetPortfolio_v['x'] = [0, 1]
+
+    # Print the weights of the Portfolio Matching 100% Volatility
+    print("Weights for Portfolio Matching 100% VT Volatility:")
+    for stock, weight in zip(meanReturns.index, targetPortfolio_v['x']):
+        print(f"{stock}: {weight:.4f}")
+
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
+    print(f"\nAnnualized Return of the Portfolio Matching 100% Volatility: {target_returns_v * 100:.2f}%")
+    print(f"Annualized Volatility of the Portfolio Matching 100% Volatility: {target_std_v * 100:.2f}%")
+    print(f"Sharpe Ratio of the Portfolio Matching 100% Volatility {target_sharpe_v:.4f}\n")
+
+    targetPortfolio_r = calculateTargetPortfolio_r(meanReturns, covMatrix, vt_return, cml_volatility, constraintSet)
+    target_returns_r, target_std_r = portfolioPerformance(targetPortfolio_r['x'], meanReturns, covMatrix, riskFreeRate, leverageCost)
+    target_sharpe_r = (target_returns_r - riskFreeRate) / target_std_r
+    target_weights_r = pd.DataFrame(targetPortfolio_r['x'], index=meanReturns.index, columns=['allocation'])
+    target_weights_r.allocation = [round(i * 100, 2) for i in target_weights_r.allocation]
+
+    if (target_sharpe_r <= vt_sharpe):
+        target_returns_r, target_std_r = vt_return, vt_volatility
+        target_sharpe_r = vt_sharpe
+        targetPortfolio_r['x'] = [0, 1]
+
+    # Print the weights of the Portfolio Matching 100% Volatility
+    print("Weights for Portfolio Matching 100% VT Returns:")
+    for stock, weight in zip(meanReturns.index, targetPortfolio_r['x']):
+        print(f"{stock}: {weight:.4f}")
+
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
+    print(f"\nAnnualized Return of the Portfolio Matching 100% Returns: {target_returns_r * 100:.2f}%")
+    print(f"Annualized Volatility of the Portfolio Matching 100% Returns: {target_std_r * 100:.2f}%")
+    print(f"Sharpe Ratio of the Portfolio Matching 100% Returns {target_sharpe_r:.4f}\n")
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
 
-    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns
+    vt_return, vt_volatility = round(vt_return * 100, 2), round(vt_volatility * 100, 2)
+    bndw_return, bndw_volatility = round(bndw_return * 100, 2), round(bndw_volatility * 100, 2)
 
-def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
+    target_returns_v, target_std_v= round(target_returns_v * 100, 2), round(target_std_v * 100, 2)
+    target_returns_r, target_std_r= round(target_returns_r * 100, 2), round(target_std_r * 100, 2)
+
+    return maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bndw_return, bndw_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns
+
+def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0242, leverageCost=0.0, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, constraintSet)
+    maxSR_returns, maxSR_std, maxSR_allocation, minVol_returns, minVol_std, minVol_allocation, vt_return, vt_volatility, bndw_return, bndw_volatility, target_returns_r, target_std_r, target_returns_v, target_std_v, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, riskFreeRate, leverageCost, constraintSet)
 
-    # Max SR
-    MaxSharpeRatio = go.Scatter(
-        name='Maximum Sharpe Ratio',
+    # Tangency Porfolio
+    TangencyPortfolio = go.Scatter(
+        name='Tangency Portfolio',
         mode='markers',
         x=[maxSR_std],
         y=[maxSR_returns],
@@ -182,6 +283,42 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
         marker=dict(color='green', size=14, line=dict(width=3, color='black'))
     )
 
+    # 100% VT
+    Vt = go.Scatter(
+        name='100% VT Portfolio',
+        mode='markers',
+        x=[vt_volatility],
+        y=[vt_return],
+        marker=dict(color='orange', size=14, line=dict(width=3, color='black'))
+    )
+
+    # 100% BNDW
+    Bnd = go.Scatter(
+        name='100% BNDW Portfolio',
+        mode='markers',
+        x=[bndw_volatility],
+        y=[bndw_return],
+        marker=dict(color='blue', size=14, line=dict(width=3, color='black'))
+    )
+
+    # Portfolio Matching 100% VT Volatility
+    Cml_Vt_Vol = go.Scatter(
+        name='Portfolio Matching 100% VT Volatility',
+        mode='markers',
+        x=[target_std_v],
+        y=[target_returns_v],
+        marker=dict(color='purple', size=14, line=dict(width=3, color='black'))
+    )
+
+    # Portfolio Matching 100% VT Return
+    Cml_Vt_Ret = go.Scatter(
+        name='Portfolio Matching 100% VT Return',
+        mode='markers',
+        x=[target_std_r],
+        y=[target_returns_r],
+        marker=dict(color='pink', size=14, line=dict(width=3, color='black'))
+    )
+
     # Efficient Frontier
     EF_curve = go.Scatter(
         name='Efficient Frontier',
@@ -192,7 +329,7 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
     )
 
     # Tangency Line (Capital Market Line)
-    CML_x = np.linspace(0, max(efficientList) * 100, 100)
+    CML_x = np.linspace(0, 100, 500)  # Adjusted to extend the CML
     CML_y = riskFreeRate * 100 + (maxSR_returns - riskFreeRate * 100) / maxSR_std * CML_x
     CML = go.Scatter(
         name='Capital Market Line (CML)',
@@ -202,23 +339,36 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0529, constraintSet=(0, 1)):
         line=dict(color='blue', width=2, dash='dash')
     )
 
-    data = [MaxSharpeRatio, MinVol, EF_curve, CML]
+    x_max = vt_volatility * 1.25
+    y_max = vt_return * 1.25
+
+    data = [EF_curve, CML, Vt, Bnd, Cml_Vt_Vol, Cml_Vt_Ret, MinVol, TangencyPortfolio]
 
     layout = go.Layout(
         title='Portfolio Optimization with the Efficient Frontier',
-        yaxis=dict(title='Annualized Return (%)'),
-        xaxis=dict(title='Annualized Volatility (%)'),
+        yaxis=dict(title='Annualized Return (%)', range=[0, y_max]),
+        xaxis=dict(title='Annualized Volatility (%)', range=[0, x_max]),
         showlegend=True,
         legend=dict(
             x=0.75, y=0, traceorder='normal',
             bgcolor='#E2E2E2',
             bordercolor='black',
             borderwidth=2),
-        width=800,
-        height=600
+        width=1250,
+        height=1250
     )
 
     fig = go.Figure(data=data, layout=layout)
     return fig.show()
+
+stock_list = ['VT', 'BNDW']
+stocks = [stock for stock in stock_list]
+
+end_date = dt.datetime.now()
+
+end_date_str = end_date.strftime('%Y-%m-%d')
+start_date_str = '2007-04-03'
+
+meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
 
 EF_graph(meanReturns, covMatrix)
