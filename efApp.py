@@ -81,7 +81,7 @@ def minimizeVariance(meanReturns, covMatrix, constraintSet=(0, 1)):
     "Minimize the portfolio variance by altering the weights/allocation of assets in the portfolio"
     numAssets = len(meanReturns)
     args = (meanReturns, covMatrix)
-    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    constraints = ({'type': 'ineq', 'fun': lambda x: np.sum(x) - 1})
     bound = constraintSet
     bounds = tuple(bound for asset in range(numAssets))
     result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
@@ -97,7 +97,8 @@ def efficientOpt(meanReturns, covMatrix, returnTarget, constraintSet=(0, 1)):
     args = (meanReturns, covMatrix)
 
     constraints = ({'type': 'eq', 'fun': lambda x: portfolioReturn(x, meanReturns, covMatrix) - returnTarget},
-                   {'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+                   {'type': 'ineq', 'fun': lambda x: np.sum(x) - 1},
+                   {'type': 'ineq', 'fun': lambda x: 2 - np.sum(x)})
     bound = constraintSet
     bounds = tuple(bound for asset in range(numAssets))
     effOpt = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
@@ -148,6 +149,11 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     maxSR_allocation = pd.DataFrame(maxSR_Portfolio['x'], index=meanReturns.index, columns=['allocation'])
     maxSR_allocation.allocation = [round(i * 100, 0) for i in maxSR_allocation.allocation]
 
+    # Calculate the volatility of 100% VT portfolio
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+
+    # Find and print the risk parity portfolio with the same volatility as 100% VT
+    weights = risk_parity_portfolio(meanReturns, covMatrix, vt_volatility)
     # Calculate Sharpe Ratio
     maxSR_sharpe = (maxSR_returns - riskFreeRate) / maxSR_std
 
