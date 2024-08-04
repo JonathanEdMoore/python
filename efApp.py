@@ -16,6 +16,26 @@ def get_data(stocks, start, end):
 
     return meanReturns, covMatrix
 
+def get_dividend_yield(ticker, period):
+    # Fetch historical data for the stock
+    stock = yf.Ticker(ticker)
+    data = stock.history(period=period)
+
+    # Resample dividend data to get annual dividends
+    dividends = stock.dividends
+    annual_dividends = dividends.resample('YE').sum() # Sum dividends per year
+
+    # Calculate average closing price per year
+    annual_prices = data['Close'].resample('YE').mean()
+
+    # Calculate annual dividend yields
+    annual_dividend_yields = annual_dividends / annual_prices
+
+    # Average annual dividend yield
+    average_dividend_yield = annual_dividend_yields.mean()
+
+    return average_dividend_yield
+
 def portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
     # Determine if leverage is used
     leverage = np.sum(weights) - 1
@@ -56,16 +76,6 @@ def minimizeVariance(meanReturns, covMatrix, constraintSet=(0, 1)):
     result = sc.minimize(portfolioVariance, numAssets * [1. / numAssets], args=args,
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
-
-stock_list = ['VT', 'BNDW']
-stocks = [stock for stock in stock_list]
-
-end_date = dt.datetime.now()
-
-end_date_str = end_date.strftime('%Y-%m-%d')
-start_date_str = '2007-04-03'
-
-meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
 
 def portfolioReturn(weights, meanReturns, covMatrix):
     return portfolioPerformance(weights, meanReturns, covMatrix)[0]
@@ -110,6 +120,14 @@ def calculateTargetPortfolio_r(meanReturns, covMatrix, targetReturns, cmlVolatil
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
 
+def calculate_single_stock_volatility(stock, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
+        weights = np.zeros(len(meanReturns))
+        weights[meanReturns.index.get_loc(stock)] = 1
+        return portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)[1]
+
+def calculate_single_stock_return(stock, meanReturns):
+        return meanReturns[stock] * 252  # Annualize the return
+
 def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
@@ -131,21 +149,14 @@ def calculatedResults(meanReturns, covMatrix, riskFreeRate=0, leverageCost=0, co
     print(f"\nAnnualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
     print(f"Annualized Volatility of the Tangency Portfolio: {maxSR_std * 100:.2f}%")
     print(f"Sharpe Ratio of the Tangency Portfolio: {maxSR_sharpe:.4f}\n")
-
-    def calculate_single_stock_volatility(stock, meanReturns, covMatrix):
-        weights = np.zeros(len(meanReturns))
-        weights[meanReturns.index.get_loc(stock)] = 1
-        return portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate, leverageCost)[1]
     
-    def calculate_single_stock_return(stock, meanReturns):
-        return meanReturns[stock] * 252  # Annualize the return
     # 100% VT Portfolio
-    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix)
+    vt_volatility = calculate_single_stock_volatility('VT', meanReturns, covMatrix, riskFreeRate, leverageCost)
     vt_return = calculate_single_stock_return('VT', meanReturns)
     vt_sharpe = (vt_return - riskFreeRate) / vt_volatility
 
     # 100% BND Portfolio
-    bndw_volatility = calculate_single_stock_volatility('BNDW', meanReturns, covMatrix)
+    bndw_volatility = calculate_single_stock_volatility('BNDW', meanReturns, covMatrix, riskFreeRate, leverageCost)
     bndw_return = calculate_single_stock_return('BNDW', meanReturns)
     bndw_sharpe = (bndw_return - riskFreeRate) / bndw_volatility
 
@@ -332,5 +343,15 @@ def EF_graph(meanReturns, covMatrix, riskFreeRate=0.0242, leverageCost=0.0, cons
 
     fig = go.Figure(data=data, layout=layout)
     return fig.show()
+
+stock_list = ['VT', 'BNDW']
+stocks = [stock for stock in stock_list]
+
+end_date = dt.datetime.now()
+
+end_date_str = end_date.strftime('%Y-%m-%d')
+start_date_str = '2007-04-03'
+
+meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
 
 EF_graph(meanReturns, covMatrix)
