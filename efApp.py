@@ -16,25 +16,34 @@ def get_data(stocks, start, end):
 
     return meanReturns, covMatrix
 
-def get_dividend_yield(ticker, period):
-    # Fetch historical data for the stock
-    stock = yf.Ticker(ticker)
-    data = stock.history(period=period)
+def get_dividend_yield(tickers, period):
+    dividend_yields = {}
 
-    # Resample dividend data to get annual dividends
-    dividends = stock.dividends
-    annual_dividends = dividends.resample('YE').sum() # Sum dividends per year
+    for ticker in tickers:
+        # Fetch historical data for the stock
+        stock = yf.Ticker(ticker)
+        data = stock.history(period=period)
 
-    # Calculate average closing price per year
-    annual_prices = data['Close'].resample('YE').mean()
+        # Resample dividend data to get annual dividends
+        dividends = stock.dividends
+        annual_dividends = dividends.resample('YE').sum()  # Sum dividends per year
 
-    # Calculate annual dividend yields
-    annual_dividend_yields = annual_dividends / annual_prices
+        # Calculate average closing price per year
+        annual_prices = data['Close'].resample('YE').mean()
 
-    # Average annual dividend yield
-    average_dividend_yield = annual_dividend_yields.mean()
+        # Calculate annual dividend yields
+        annual_dividend_yields = annual_dividends / annual_prices
 
-    return average_dividend_yield
+        # Average annual dividend yield
+        average_dividend_yield = annual_dividend_yields.mean()
+
+        # Store the result in the dictionary
+        dividend_yields[ticker] = average_dividend_yield
+
+    # Convert dictionary to Pandas Series
+    dividend_yield_series = pd.Series(dividend_yields, name='Dividend Yield')
+    
+    return dividend_yield_series
 
 def portfolioPerformance(weights, meanReturns, covMatrix, riskFreeRate=0, leverageCost=0):
     # Determine if leverage is used

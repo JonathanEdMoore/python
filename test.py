@@ -1,7 +1,7 @@
 import yfinance as yf
 
 # Define the stock ticker
-ticker = "BNDW"  # Example: VT for Vanguard Total World Stock ETF
+ticker = "VT"  # Example: VT for Vanguard Total World Stock ETF
 
 # Fetch historical data for the stock
 stock = yf.Ticker(ticker)
