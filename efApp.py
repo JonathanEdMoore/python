@@ -188,3 +188,44 @@ start_date_str = '2007-04-03'
 meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
 
 EF_graph(meanReturns, covMatrix)
+
+def average_annual_dividend_yield(tickers):
+    yields = {}
+    
+    for ticker in tickers:
+        # Fetch the stock data
+        stock = yf.Ticker(ticker)
+        
+        # Get the historical dividends
+        dividends = stock.dividends
+        
+        if dividends.empty:
+            yields[ticker] = 0  # No dividends paid
+            continue
+        
+        # Get historical price data (close prices)
+        price_data = stock.history(period="max")
+        
+        # Calculate the annual dividends
+        annual_dividends = dividends.groupby(dividends.index.year).sum()
+        
+        # Calculate the average annual closing price
+        annual_prices = price_data['Close'].resample('Y').mean()
+        
+        # Ensure the years match between dividends and prices
+        annual_dividends = annual_dividends[annual_dividends.index.isin(annual_prices.index.year)]
+        annual_prices = annual_prices[annual_prices.index.year.isin(annual_dividends.index)]
+        
+        # Calculate the annual dividend yield
+        annual_yields = (annual_dividends / annual_prices.values) * 100
+        
+        # Calculate the average annual dividend yield
+        average_annual_yield = annual_yields.mean()
+        
+        # Store the result in the dictionary
+        yields[ticker] = average_annual_yield
+    
+    # Convert the dictionary to a Pandas Series
+    return pd.Series(yields)
+
+print(average_annual_dividend_yield(stocks))
