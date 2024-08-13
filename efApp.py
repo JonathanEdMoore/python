@@ -37,7 +37,7 @@ def average_annual_dividend_yield(tickers):
         annual_dividends = dividends.groupby(dividends.index.year).sum()
         
         # Calculate the average annual closing price
-        annual_prices = price_data['Close'].resample('Y').mean()
+        annual_prices = price_data['Close'].resample('YE').mean()
         
         # Ensure the years match between dividends and prices
         annual_dividends = annual_dividends[annual_dividends.index.isin(annual_prices.index.year)]
