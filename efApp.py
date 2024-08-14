@@ -130,7 +130,7 @@ def return_matching_leverage_factor(maxSR_returns, targetReturns, riskFreeRate=0
 
     return leverageFactor
 
-def volatility_matching_leverage_factor(maxSR_std, targetVolatility, riskFreeRate=0, borrowingRate=0):
+def volatility_matching_leverage_factor(maxSR_std, targetVolatility):
 
     leverageFactor = targetVolatility / maxSR_std
 
