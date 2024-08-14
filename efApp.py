@@ -111,6 +111,13 @@ def efficientOpt(meanReturns, covMatrix, dividendYields, returnTarget, constrain
 
     return effOpt
 
+def adding_leverage(maxSR_returns, maxSR_std, leverageFactor, riskFreeRate=0):
+    
+    leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate)
+    leveraged_volatility = leverageFactor * maxSR_std
+
+    return leveraged_return, leveraged_volatility
+
 def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
