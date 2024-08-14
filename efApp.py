@@ -164,10 +164,12 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, co
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, dividendYields, target)['fun'])
     
-    vt_return, vt_std = (portfolioPerformance(np.array([0, 1]), meanReturns, covMatrix, dividendYields, riskFreeRate))
-    leverageFactor = return_matching_leverage_factor(maxSR_returns, vt_return, riskFreeRate, borrowingRate=0.1375)
+    target_return, target_std = (portfolioPerformance(np.array([0, 1]), meanReturns, covMatrix, dividendYields, riskFreeRate))
+    return_matching_leverageFactor = return_matching_leverage_factor(maxSR_returns, target_return, riskFreeRate, borrowingRate=0.1375)
+    volatility_matching_leverageFactor = volatility_matching_leverage_factor(maxSR_std, target_std)
 
-    print(f"Leverage Factor: {leverageFactor:.4f}")
+    print(f"Return Leverage Factor: {return_matching_leverageFactor:.4f}")
+    print(f"Volatility Leverage Factor: {volatility_matching_leverageFactor:.4f}")
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
