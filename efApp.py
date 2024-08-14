@@ -112,9 +112,15 @@ def efficientOpt(meanReturns, covMatrix, dividendYields, returnTarget, constrain
     return effOpt
 
 def adding_leverage(maxSR_returns, maxSR_std, leverageFactor, riskFreeRate=0, borrowingRate=0):
-    
-    leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate) - (leverageFactor - 1) * borrowingRate
-    leveraged_volatility = leverageFactor * maxSR_std
+    if leverageFactor > 1:
+        leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate) - (leverageFactor - 1) * borrowingRate
+        leveraged_volatility = leverageFactor * maxSR_std
+    elif leverageFactor < 0:
+        leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate) - (leverageFactor - 1) * borrowingRate
+        leveraged_volatility = abs(leverageFactor) * maxSR_std
+    else: 
+        leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate)
+        leveraged_volatility = leverageFactor * maxSR_std
 
     return leveraged_return, leveraged_volatility
 
@@ -165,11 +171,19 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, co
         efficientList.append(efficientOpt(meanReturns, covMatrix, dividendYields, target)['fun'])
     
     target_return, target_std = (portfolioPerformance(np.array([0, 1]), meanReturns, covMatrix, dividendYields, riskFreeRate))
-    return_matching_leverageFactor = return_matching_leverage_factor(maxSR_returns, target_return, riskFreeRate, borrowingRate=0.1375)
+    return_matching_leverageFactor = return_matching_leverage_factor(maxSR_returns, target_return, riskFreeRate, borrowingRate=0.0)
     volatility_matching_leverageFactor = volatility_matching_leverage_factor(maxSR_std, target_std)
 
-    print(f"Return Leverage Factor: {return_matching_leverageFactor:.4f}")
-    print(f"Volatility Leverage Factor: {volatility_matching_leverageFactor:.4f}")
+    return_matching_leveraged_returns, return_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, return_matching_leverageFactor, riskFreeRate, borrowingRate=0.0)
+    print(f"Return Matching Leveraged Returns: {return_matching_leveraged_returns * 100:.2f}%")
+    print(f"Return Matching Leveraged Volatility: {return_matching_leveraged_volatility * 100:.2f}%\n")
+
+    volatility_matching_leveraged_returns, volatility_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, volatility_matching_leverageFactor, riskFreeRate, borrowingRate=0.0)
+    print(f"Volatility Matching Leveraged Returns: {volatility_matching_leveraged_returns * 100:.2f}%")
+    print(f"Volatility Matching Leveraged Volatility: {volatility_matching_leveraged_volatility * 100:.2f}%\n")
+
+    print(f"Return Leverage Factor: {return_matching_leverageFactor:.2f}")
+    print(f"Volatility Leverage Factor: {volatility_matching_leverageFactor:.2f}")
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
