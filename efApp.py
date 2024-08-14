@@ -53,7 +53,7 @@ def average_annual_dividend_yield(tickers):
         yields[ticker] = average_annual_yield
     
     # Convert the dictionary to a Pandas Series
-    return pd.Series(yields)
+    return pd.Series(yields).sort_index()
 
 def portfolioPerformance(weights, meanReturns, covMatrix, dividendYields, riskFreeRate=0):
     
@@ -118,6 +118,18 @@ def adding_leverage(maxSR_returns, maxSR_std, leverageFactor, riskFreeRate=0, bo
 
     return leveraged_return, leveraged_volatility
 
+def return_matching_leverage_factor(maxSR_returns, targetReturns, riskFreeRate=0, borrowingRate=0):
+    
+    leverageFactor = (targetReturns - riskFreeRate - borrowingRate) / (maxSR_returns - riskFreeRate - borrowingRate)
+
+    return leverageFactor
+
+def volatility_matching_leverage_factor(maxSR_std, targetVolatility, riskFreeRate=0, borrowingRate=0):
+
+    leverageFactor = targetVolatility / maxSR_std
+
+    return leverageFactor
+    
 def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
@@ -151,13 +163,18 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, co
     targetReturns = np.linspace(minVol_returns, maxSR_returns, 20)
     for target in targetReturns:
         efficientList.append(efficientOpt(meanReturns, covMatrix, dividendYields, target)['fun'])
+    
+    vt_return, vt_std = (portfolioPerformance(np.array([0, 1]), meanReturns, covMatrix, dividendYields, riskFreeRate))
+    leverageFactor = return_matching_leverage_factor(maxSR_returns, vt_return, riskFreeRate, borrowingRate=0.1375)
+
+    print(f"Leverage Factor: {leverageFactor:.4f}")
 
     maxSR_returns, maxSR_std = round(maxSR_returns * 100, 2), round(maxSR_std * 100, 2)
     minVol_returns, minVol_std = round(minVol_returns * 100, 2), round(minVol_std * 100, 2)
 
     return maxSR_returns, maxSR_std, minVol_returns, minVol_std, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.047, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0529, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
     maxSR_returns, maxSR_std, minVol_returns, minVol_std, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate, constraintSet)
 
