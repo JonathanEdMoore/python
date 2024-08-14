@@ -136,7 +136,7 @@ def volatility_matching_leverage_factor(maxSR_std, targetVolatility, riskFreeRat
 
     return leverageFactor
     
-def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, constraintSet=(0, 1)):
+def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, borrowingRate=0, constraintSet=(0, 1)):
     """Read in mean, cov matrix, and other financial information
        Output, Max SR, Min Volatility, efficient frontier """
     # Max Sharpe Ratio Portfolio
@@ -171,14 +171,14 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, co
         efficientList.append(efficientOpt(meanReturns, covMatrix, dividendYields, target)['fun'])
     
     target_return, target_std = (portfolioPerformance(np.array([0, 1]), meanReturns, covMatrix, dividendYields, riskFreeRate))
-    return_matching_leverageFactor = return_matching_leverage_factor(maxSR_returns, target_return, riskFreeRate, borrowingRate=0.0)
+    return_matching_leverageFactor = return_matching_leverage_factor(maxSR_returns, target_return, riskFreeRate, borrowingRate)
     volatility_matching_leverageFactor = volatility_matching_leverage_factor(maxSR_std, target_std)
 
-    return_matching_leveraged_returns, return_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, return_matching_leverageFactor, riskFreeRate, borrowingRate=0.0)
+    return_matching_leveraged_returns, return_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, return_matching_leverageFactor, riskFreeRate, borrowingRate)
     print(f"Return Matching Leveraged Returns: {return_matching_leveraged_returns * 100:.2f}%")
     print(f"Return Matching Leveraged Volatility: {return_matching_leveraged_volatility * 100:.2f}%\n")
 
-    volatility_matching_leveraged_returns, volatility_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, volatility_matching_leverageFactor, riskFreeRate, borrowingRate=0.0)
+    volatility_matching_leveraged_returns, volatility_matching_leveraged_volatility = adding_leverage(maxSR_returns, maxSR_std, volatility_matching_leverageFactor, riskFreeRate, borrowingRate)
     print(f"Volatility Matching Leveraged Returns: {volatility_matching_leveraged_returns * 100:.2f}%")
     print(f"Volatility Matching Leveraged Volatility: {volatility_matching_leveraged_volatility * 100:.2f}%\n")
 
@@ -190,9 +190,9 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, co
 
     return maxSR_returns, maxSR_std, minVol_returns, minVol_std, efficientList, targetReturns
 
-def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0529, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0529, borrowingRate=0.0, constraintSet=(0, 1)):
     """Return a graph plotting the min vol, max sr, efficient frontier, and tangency line"""
-    maxSR_returns, maxSR_std, minVol_returns, minVol_std, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate, constraintSet)
+    maxSR_returns, maxSR_std, minVol_returns, minVol_std, efficientList, targetReturns = calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate, borrowingRate, constraintSet)
 
     # Tangency Porfolio
     TangencyPortfolio = go.Scatter(
