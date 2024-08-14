@@ -111,9 +111,9 @@ def efficientOpt(meanReturns, covMatrix, dividendYields, returnTarget, constrain
 
     return effOpt
 
-def adding_leverage(maxSR_returns, maxSR_std, leverageFactor, riskFreeRate=0):
+def adding_leverage(maxSR_returns, maxSR_std, leverageFactor, riskFreeRate=0, borrowingRate=0):
     
-    leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate)
+    leveraged_return = riskFreeRate + leverageFactor * (maxSR_returns - riskFreeRate) - (leverageFactor - 1) * borrowingRate
     leveraged_volatility = leverageFactor * maxSR_std
 
     return leveraged_return, leveraged_volatility
