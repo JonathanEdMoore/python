@@ -31,8 +31,6 @@ terminal_value_multiple = 15  # Multiple of the final year's cash flow
 # print(dcf(initial_cash_flow, growth_rate, discount_rate, years, terminal_value_multiple))
 
 annual_ubi = 12000
-growth_rate = 0.02
-discount_rate = 0.07
 years = 60
 terminal_value_multiple = 0 # Can't sell the UBI as an asset
 
