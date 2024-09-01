@@ -34,4 +34,4 @@ annual_ubi = 12000
 years = 60
 terminal_value_multiple = 0 # Can't sell the UBI as an asset
 
-print(f"\nUBI Intrinsic value: ${round(dcf(annual_ubi, growth_rate, discount_rate, years, terminal_value_multiple), 2)}")
+print(f"\nUBI Intrinsic value: ${dcf(annual_ubi, growth_rate, discount_rate, years, terminal_value_multiple):,.2f}")
