@@ -28,12 +28,10 @@ discount_rate = 0.07  # 7% discount rate
 years = 30  # Projection period
 terminal_value_multiple = 15  # Multiple of the final year's cash flow
 
-print(dcf(initial_cash_flow, growth_rate, discount_rate, years, terminal_value_multiple))
+# print(dcf(initial_cash_flow, growth_rate, discount_rate, years, terminal_value_multiple))
 
 annual_ubi = 12000
-inflation = 0.02
-ubi_discount = 0.07
-years = 62
+years = 60
 terminal_value_multiple = 0 # Can't sell the UBI as an asset
 
-print(f"\nUBI Intrinsic value: {dcf(annual_ubi, inflation, ubi_discount, years, terminal_value_multiple)}")
+print(f"\nUBI Intrinsic value: ${dcf(annual_ubi, growth_rate, discount_rate, years, terminal_value_multiple):,.2f}")
