@@ -40,15 +40,18 @@ def wacc_with_amortization(price_of_home, down_payment_percent, cost_of_equity, 
     average_wacc = total_wacc / (mortgage_term_years + 1)  # Including year 0
     return average_wacc
 
-price_of_home = 8000000
-rent = 51690.85*12
+price_of_home = 303608.91
+rent = (970*2)*12
 down_payment_percent = .25
 down_payment = price_of_home * down_payment_percent
 mortgage_term_years = 15
+# mortgage_term_years = 30
 property_tax = 0.0189 
 hoa = 0.01 # Can also be considered maintenance costs
 insurance = 0.005
-cost_of_debt = 0.05629
+# cost_of_debt = 0.03
+cost_of_debt = 0.05408
+# cost_of_debt = 0.05935
 expected_return_real_estate = 0.03
 expected_return_stocks = 0.07
 cost_of_equity = expected_return_stocks - expected_return_real_estate
