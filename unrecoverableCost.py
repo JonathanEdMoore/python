@@ -1,4 +1,4 @@
-def wacc_with_amortization(price_of_home, down_payment_percent, cost_of_equity, cost_of_debt, mortgage_term_years):
+def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_debt, mortgage_term_years, pmi_rate=0):
     # Initial values
     down_payment = price_of_home * down_payment_percent
     mortgage = price_of_home - down_payment  # Initial loan amount
@@ -11,6 +11,7 @@ def wacc_with_amortization(price_of_home, down_payment_percent, cost_of_equity, 
 
     # Variables to store the sum of WACC over the years
     total_wacc = 0
+    pmi_total = 0  # Track total PMI paid
 
     # Remaining principal starts as the full mortgage
     remaining_principal = mortgage
@@ -21,51 +22,65 @@ def wacc_with_amortization(price_of_home, down_payment_percent, cost_of_equity, 
         for month in range(12):  # Iterate through 12 months for each year
             interest_payment = remaining_principal * monthly_rate
             principal_payment = monthly_payment - interest_payment
-            # print(f"Year: {year+1}")
-            # print(f"Month: {month+1}")
-            # print(f"Interest Payment: ${interest_payment:,.2f}")
-            # print(f"Principal Payment: ${principal_payment:,.2f}\n")
             remaining_principal -= principal_payment
 
         # Equity increases as the remaining principal decreases
         equity = price_of_home - remaining_principal  # Home equity at year t
         total_value = price_of_home  # Total value (home price remains constant)
 
-        # WACC at time t
-        wacc_t = (remaining_principal / total_value) * cost_of_debt + (equity / total_value) * cost_of_equity
+        # Calculate LTV ratio
+        ltv = remaining_principal / price_of_home
+
+        # Adjust the cost of debt to include PMI if LTV is above 80%
+        if ltv > 0.80:
+            effective_cost_of_debt = cost_of_debt + pmi_rate  # Adding PMI rate to the cost of debt
+            pmi_annual = mortgage * pmi_rate  # PMI is a percentage of the original loan amount
+            pmi_total += pmi_annual  # Accumulate PMI costs
+        else:
+            effective_cost_of_debt = cost_of_debt  # No PMI once LTV <= 80%
+
+        # WACC at time t with adjusted cost of debt
+        wacc_t = (remaining_principal / total_value) * effective_cost_of_debt + (equity / total_value) * cost_of_equity
         
         # Add WACC of year t to the total
         total_wacc += wacc_t
+
     # Calculate the average WACC over the full mortgage term
     average_wacc = total_wacc / (mortgage_term_years + 1)  # Including year 0
-    return average_wacc
+    return average_wacc, pmi_total  # Return both WACC and total PMI paid
 
-price_of_home = 303608.91
-rent = (970*2)*12
-down_payment_percent = .25
+# Inputs
+price_of_home = 1291043.55
+rent = 10000 * 12
+down_payment_percent = 0.035
 down_payment = price_of_home * down_payment_percent
 mortgage_term_years = 15
-# mortgage_term_years = 30
-property_tax = 0.0189 
-hoa = 0.01 # Can also be considered maintenance costs
+property_tax = 0.0189
+hoa = 0.01  # HOA fees
 insurance = 0.005
-# cost_of_debt = 0.03
-cost_of_debt = 0.05408
-# cost_of_debt = 0.05935
+cost_of_debt = 0.05468
 expected_return_real_estate = 0.03
-expected_return_stocks = 0.07
+expected_return_stocks = 0.1
 cost_of_equity = expected_return_stocks - expected_return_real_estate
-average_cost_of_capital = wacc_with_amortization(price_of_home, down_payment_percent, cost_of_equity, cost_of_debt, mortgage_term_years)
 
+# PMI rate (example: 0.5% annually)
+pmi_rate = 0.005  # Adjust PMI percentage based on loan terms
+
+# WACC with PMI calculation
+average_cost_of_capital, pmi_total = wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_debt, mortgage_term_years, pmi_rate)
+
+# Include PMI in the unrecoverable costs
 unrecoverable_cost = (average_cost_of_capital + property_tax + hoa + insurance) * price_of_home
 
+# Outputs
 print(f"Down Payment: ${down_payment:,.2f}")
+print(f"Total PMI Paid: ${pmi_total:,.2f}")
 print(f"Annual Unrecoverable Costs: ${unrecoverable_cost:,.2f}")
 print(f"Monthly Unrecoverable Costs: ${unrecoverable_cost / 12:,.2f}")
 print(f"Annual Income Needed: ${unrecoverable_cost / 0.3:,.2f}\n")
 
+# Recalculate home price based on rent and unrecoverable costs
 price_of_home = rent / (average_cost_of_capital + property_tax + hoa + insurance)
-
 print(f"Annual Rent: ${rent:,.2f}")
-print(f"Monthly Rent: ${rent/12:,.2f}")
+print(f"Monthly Rent: ${rent / 12:,.2f}")
 print(f"Estimated Value of Home: ${price_of_home:,.2f}\n")
