@@ -5,7 +5,7 @@ import statsmodels.api as sm
 import datetime
 
 # Define the time range
-start = datetime.datetime(2008, 7, 1)
+start = datetime.datetime(1925, 1, 1)
 end = datetime.datetime(2025, 3, 7)
 
 # Take input for the stock ticker
