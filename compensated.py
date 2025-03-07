@@ -56,6 +56,6 @@ compensated_risk = (beta_stock ** 2) * (vt_volatility ** 2)
 total_risk = ticker_volatility ** 2
 uncompensated_risk = total_risk - compensated_risk
 
-print(f"Compensated Risk of {stock_ticker}: {compensated_risk * 100:.2f}%")
-print(f"Uncompensated Risk of {stock_ticker}: {uncompensated_risk * 100:.2f}%")
+print(f"\nCompensated Risk of {stock_ticker}: {compensated_risk * 100:.2f}%")
+print(f"\nUncompensated Risk of {stock_ticker}: {uncompensated_risk * 100:.2f}%")
 
