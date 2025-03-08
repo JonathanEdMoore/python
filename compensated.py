@@ -56,6 +56,10 @@ compensated_risk = (beta_stock ** 2) * (vt_volatility ** 2)
 total_risk = ticker_volatility ** 2
 uncompensated_risk = total_risk - compensated_risk
 
+print(f"\nTotal Risk of {stock_ticker}: {total_risk * 100:.2f}%")
 print(f"\nCompensated Risk of {stock_ticker}: {compensated_risk * 100:.2f}%")
 print(f"\nUncompensated Risk of {stock_ticker}: {uncompensated_risk * 100:.2f}%")
+
+print(f"\n{compensated_risk / total_risk * 100:.2f}% of {stock_ticker}'s total risk is compensated.")
+print(f"\n{uncompensated_risk / total_risk * 100:.2f}% of {stock_ticker}'s total risk is uncompensated.")
 
