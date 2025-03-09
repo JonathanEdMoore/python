@@ -3,17 +3,17 @@ import matplotlib.pyplot as plt
 
 # Simulation parameters
 np.random.seed(42)  # For reproducibility
-years = 30
-initial_value = 100000
-num_simulations = 1000
+years = 28
+initial_value = 54493.92
+num_simulations = 1000000
 
 # Portfolio A (Lower Volatility)
-cagr_A = float(input("Enter the CAGR of Portfolio A): "))
-volatility_A = float(input("Enter the volatility of Portfolio A): "))
+cagr_A = float(input("Enter the CAGR of Portfolio A): ")) / 100
+volatility_A = float(input("Enter the volatility of Portfolio A): ")) / 100
 
 # Portfolio B (Higher Volatility)
-cagr_B = float(input("Enter the CAGR of Portfolio B): "))
-volatility_B = float(input("Enter the volatility of Portfolio B): "))
+cagr_B = float(input("Enter the CAGR of Portfolio B): ")) / 100
+volatility_B = float(input("Enter the volatility of Portfolio B): ")) / 100
 
 # Monte Carlo simulations
 final_values_A = []
@@ -41,14 +41,24 @@ plt.hist(final_values_A, bins=50, alpha=0.6, label="Portfolio A (Lower Volatilit
 plt.hist(final_values_B, bins=50, alpha=0.6, label="Portfolio B (Higher Volatility)")
 plt.axvline(np.median(final_values_A), color='blue', linestyle='dashed', linewidth=2, label="Median A")
 plt.axvline(np.median(final_values_B), color='orange', linestyle='dashed', linewidth=2, label="Median B")
-plt.xlabel("Final Portfolio Value ($)")
+
+# Format x-axis to have clearer labels in millions
+plt.xlabel("Final Portfolio Value (Millions)")
 plt.ylabel("Frequency")
 plt.legend()
+
+# Format the x-axis with values in millions and labels with "M"
+plt.ticklabel_format(style='plain', axis='x')  # Remove scientific notation
+plt.xticks(np.arange(min(final_values_A + final_values_B), max(final_values_A + final_values_B), step=1000000),
+           labels=[f"${x / 1e6:.1f}M" for x in np.arange(min(final_values_A + final_values_B), max(final_values_A + final_values_B), step=1000000)])
+
 plt.title(f"Monte Carlo Simulation of Portfolio Growth\nPortfolio A ends higher {prob_A_higher:.1%} of the time")
 plt.show()
 
 # Print key results
-print(f"Probability that Portfolio A (lower volatility) ends higher than Portfolio B: {prob_A_higher:.1%}")
-print(f"Probability that Portfolio B (higher volatility) ends higher than Portfolio A: {prob_B_higher:.1%}")
+print(f"\nProbability that Portfolio A (lower volatility) ends higher than Portfolio B: {prob_A_higher:.1%}")
+print(f"Probability that Portfolio B (higher volatility) ends higher than Portfolio A: {prob_B_higher:.1%}\n")
 print(f"Median final value of Portfolio A: ${np.median(final_values_A):,.2f}")
+print(f"Mean final value of Portfolio A: ${np.mean(final_values_A):,.2f}\n")
 print(f"Median final value of Portfolio B: ${np.median(final_values_B):,.2f}")
+print(f"Mean final value of Portfolio B: ${np.mean(final_values_B):,.2f}\n")
