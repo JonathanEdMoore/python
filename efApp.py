@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # Import data
 def get_data(stocks, start, end):
     stock_data = yf.download(stocks, start=start, end=end)
-    stock_data = stock_data['Adj Close']
+    stock_data = stock_data['Close']
 
     returns = stock_data.pct_change()
     meanReturns = returns.mean()
