@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
-def calculate_correlation(stock1, stock2, start_date='2020-01-01', end_date='2025-01-01'):
+def calculate_correlation(stock1, stock2, start_date='1925-01-01', end_date='2025-03-07'):
     # Fetch the historical data for both stocks
     data1 = yf.download(stock1, start=start_date, end=end_date)['Close']
     data2 = yf.download(stock2, start=start_date, end=end_date)['Close']
