@@ -36,7 +36,7 @@ print(f"Beta of {stock_ticker} relative to VT: {beta_stock}")
 # Loop through each ticker in the list
 for ticker in tickers:
      # Download historical data for the stock (adjusted close prices)
-    stock_data = yf.download(ticker, period="1y", interval="1d")  # 1 year of daily data
+    stock_data = yf.download(ticker, start, end)
 
     # Calculate daily returns
     stock_data['Daily Returns'] = stock_data['Close'].pct_change()
