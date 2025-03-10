@@ -33,10 +33,6 @@ beta_stock = model_stock.params.iloc[1]  # The second parameter is the beta
 # Print the beta result
 print(f"Beta of {stock_ticker} relative to VT: {beta_stock}")
 
-# Function to calculate CAGR
-def calculate_cagr(start_price, end_price, num_years):
-    return (end_price / start_price) ** (1 / num_years) - 1
-
 # Loop through each ticker in the list
 for ticker in tickers:
      # Download historical data for the stock (adjusted close prices)
@@ -55,28 +51,6 @@ for ticker in tickers:
 
     # Print the annualized volatility for the current ticker
     print(f"Annualized Volatility for {ticker}: {annual_volatility * 100:.2f}%")
-    # Ensure we have enough data
-    price_series = close_data[ticker].dropna()
-    
-    if price_series.empty:
-        print(f"Not enough data to calculate CAGR for {ticker}.")
-        continue
-
-    # Get first and last available prices
-    start_price = price_series.iloc[0]
-    end_price = price_series.iloc[-1]
-    
-    # Calculate actual number of years based on first and last available dates
-    start_year = price_series.index[0].year
-    end_year = price_series.index[-1].year
-    num_years = end_year - start_year
-
-    # Only calculate CAGR if we have at least 1 year of data
-    if num_years > 0:
-        cagr = calculate_cagr(start_price, end_price, num_years)
-        print(f"CAGR for {ticker}: {cagr * 100:.2f}% (From {start_year} to {end_year})")
-    else:
-        print(f"Not enough data to compute CAGR for {ticker}.")
 
 # Calculate total risk, compensated risk, and uncompensated risk
 compensated_risk = (beta_stock ** 2) * (vt_volatility ** 2)
