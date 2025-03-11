@@ -99,7 +99,7 @@ def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, bo
 
     return maxSR_returns, maxSR_std
 
-def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0529, borrowingRate=0.0, constraintSet=(0, 1)):
+def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0462, borrowingRate=0.0, constraintSet=(0, 1)):
     maxSR_returns, maxSR_std = calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate, borrowingRate, constraintSet)
 
     # Input manually defined portfolio weights (user-defined)
