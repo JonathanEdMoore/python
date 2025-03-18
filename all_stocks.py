@@ -2,43 +2,39 @@ import json
 import yfinance as yf
 import pandas as pd
 import time
-from requests.exceptions import Timeout
 
 # Load the JSON data
 with open("vt.json", "r") as file:
     data = json.load(file)
 
-# Extract holdings from the data
+# Extract the first 5 holdings from the data
 holdings = data.get("holding", [])
 
-# Prepare a list to store the tickers
+# Prepare lists to store tickers and market caps
 tickers_list = []
-
-# Function to handle retries and rate-limiting
-def get_ticker_yahoo(isin):
-    retries = 3  # Number of retries on failure
-    for attempt in range(retries):
-        try:
-            ticker_yahoo = yf.Ticker(isin)  # Create the Ticker object for ISIN
-            return ticker_yahoo
-        except Timeout as e:
-            print(f"Timeout error for {isin}. Retrying... ({attempt+1}/{retries})")
-            time.sleep(5)  # Wait before retrying
-        except Exception as e:
-            print(f"Error for {isin}: {e}")
-            break  # Stop retrying on other errors
-    return None  # Return None if all retries fail
+market_caps = []
 
 # Loop through each holding and create a Ticker object using ISIN
 for holding in holdings:
     isin = holding.get("isin")
     
-    if isin:  # Ensure that ISIN is available
-        ticker_yahoo = get_ticker_yahoo(isin)  # Get the Ticker object for ISIN
-        if ticker_yahoo:
-            print(f"Adding ticker: {ticker_yahoo.ticker}")
-            tickers_list.append(ticker_yahoo.ticker)  # Add to the tickers list
-        time.sleep(1)  # Sleep to avoid hitting rate limits
+    if isin:  # Ensure ISIN is available
+        ticker_yahoo = yf.Ticker(isin)  # Create the Ticker object for ISIN
+        market_cap = ticker_yahoo.info.get("marketCap", "No Data")
+        
+        # Append ticker and market cap to the lists
+        tickers_list.append(ticker_yahoo.ticker)
+        market_caps.append(market_cap)
+        
+    time.sleep(1)  # Sleep to avoid hitting rate limits
 
-# Print the list of tickers
-print(tickers_list)
+# Create a DataFrame to store the tickers and market caps
+df = pd.DataFrame({
+    "Ticker": tickers_list,
+    "Market Cap": market_caps
+})
+
+# Save the data to a CSV file
+df.to_csv("market_caps_first_5.csv", index=False)
+
+print("Market cap data for the first 5 stocks saved to market_caps_first_5.csv")
