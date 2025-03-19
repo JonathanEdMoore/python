@@ -1,131 +1,180 @@
 import numpy as np
 import pandas as pd
-import datetime as dt
+import datetime
 import yfinance as yf
 import scipy.optimize as sc
 import plotly.graph_objects as go
 
 # Import data
 def get_data(stocks, start, end):
-    stock_data = yf.download(stocks, start=start, end=end)
-    stock_data = stock_data['Close']
-
+    stock_data = yf.download(stocks, start=start, end=end, auto_adjust=True)["Close"].dropna(how="all")
     returns = stock_data.pct_change()
-    meanReturns = returns.mean()
-    covMatrix = returns.cov()
+    mean_returns = returns.mean()
+    cov_matrix = returns.cov()
+    return mean_returns, cov_matrix
 
-    return meanReturns, covMatrix
-
-def average_annual_dividend_yield(tickers):
-    yields = {}
-    
-    for ticker in tickers:
-        # Fetch the stock data
-        stock = yf.Ticker(ticker)
-        
-        # Get the historical dividends
-        dividends = stock.dividends
-        
-        if dividends.empty:
-            yields[ticker] = 0  # No dividends paid
-            continue
-        
-        # Get historical price data (close prices)
-        price_data = stock.history(period="max")
-        
-        # Calculate the annual dividends
-        annual_dividends = dividends.groupby(dividends.index.year).sum()
-        
-        # Calculate the average annual closing price
-        annual_prices = price_data['Close'].resample('YE').mean()
-        
-        # Ensure the years match between dividends and prices
-        annual_dividends = annual_dividends[annual_dividends.index.isin(annual_prices.index.year)]
-        annual_prices = annual_prices[annual_prices.index.year.isin(annual_dividends.index)]
-        
-        # Calculate the annual dividend yield
-        annual_yields = (annual_dividends / annual_prices.values)
-        
-        # Calculate the average annual dividend yield
-        average_annual_yield = annual_yields.mean()
-        
-        # Store the result in the dictionary
-        yields[ticker] = average_annual_yield
-    
-    # Convert the dictionary to a Pandas Series
-    return pd.Series(yields).sort_index()
-
-def portfolioPerformance(weights, meanReturns, covMatrix, dividendYields, riskFreeRate=0):
-    # Calculate the weighted average dividend yield
-    weighted_dividends = np.sum(weights * dividendYields)
-    
-    # Calculate the weighted average return (annualized return)
-    adjusted_returns = np.sum(meanReturns * weights) * 252 + weighted_dividends
-    
-    # Calculate the standard deviation (volatility)
-    std = np.sqrt(np.dot(weights.T, np.dot(covMatrix, weights))) * np.sqrt(252)
+def portfolio_performance(weights, mean_returns, cov_matrix):
+    adjusted_returns = np.sum(mean_returns * weights) * 252
+    std = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)
     return adjusted_returns, std
 
-def negativeSR(weights, meanReturns, covMatrix, dividendYields, riskFreeRate=0):
-    pReturns, pStd = portfolioPerformance(weights, meanReturns, covMatrix, dividendYields, riskFreeRate)
-    return -(pReturns - riskFreeRate) / pStd
+def negative_sr(weights, mean_returns, cov_matrix, risk_free_rate=0):
+    p_returns, p_std = portfolio_performance(weights, mean_returns, cov_matrix)
+    return -(p_returns - risk_free_rate) / p_std
 
-def maxSR(meanReturns, covMatrix, dividendYields, riskFreeRate=0, constraintSet=(0, 1)):
-    numAssets = len(meanReturns)
-    args = (meanReturns, covMatrix, dividendYields, riskFreeRate)
+def max_sr(mean_returns, cov_matrix, risk_free_rate=0, constraint_set=(0, 1)):
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix, risk_free_rate)
     constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
-    bound = constraintSet
-    bounds = tuple(bound for asset in range(numAssets))
-    result = sc.minimize(negativeSR, numAssets * [1. / numAssets], args=args,
+    bounds = tuple(constraint_set for _ in range(num_assets))
+    result = sc.minimize(negative_sr, num_assets * [1. / num_assets], args=args,
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
 
-def portfolioReturn(weights, meanReturns, covMatrix, dividendYields):
-    return portfolioPerformance(weights, meanReturns, covMatrix, dividendYields)[0]
+def portfolio_variance(weights, mean_returns, cov_matrix):
+    return portfolio_performance(weights, mean_returns, cov_matrix)[1]
 
-def calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate=0, borrowingRate=0, constraintSet=(0, 1)):
-    # Max Sharpe Ratio Portfolio
-    maxSR_Portfolio = maxSR(meanReturns, covMatrix, dividendYields, riskFreeRate)
-    maxSR_returns, maxSR_std = portfolioPerformance(maxSR_Portfolio['x'], meanReturns, covMatrix, dividendYields, riskFreeRate)
+def minimize_variance(mean_returns, cov_matrix, constraint_set=(0,1)):
+    "Minimize the portfolio variance by altering the weights/allocation of assets in the portfolio"
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix)
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bound = constraint_set
+    bounds = tuple(bound for asset in range(num_assets))
+    result = sc.minimize(portfolio_variance, num_assets * [1. / num_assets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    
+    return result
 
-    # Print the weights of the tangency portfolio
+def portfolio_return(weights, mean_returns, cov_matrix):
+    return portfolio_performance(weights, mean_returns, cov_matrix)[0]
+
+def efficient_opt(mean_returns, cov_matrix, return_target, constraint_set=(0,1)):
+    """For each returnTarget, we want to optimize the portfolio for min variance"""
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix)
+
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolio_return(x, mean_returns, cov_matrix) - return_target},
+                   {'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bound = constraint_set
+    bounds = tuple(bound for asset in range(num_assets))
+    eff_opt = sc.minimize(portfolio_variance, num_assets * [1. / num_assets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+
+    return eff_opt
+
+def calculated_results(mean_returns, cov_matrix, risk_free_rate=0):
+    max_sr_portfolio = max_sr(mean_returns, cov_matrix, risk_free_rate)
+    max_sr_returns, max_sr_std = portfolio_performance(max_sr_portfolio['x'], mean_returns, cov_matrix)
+    max_sr_allocation = pd.DataFrame(max_sr_portfolio['x'], index=mean_returns.index, columns=['allocation'])
+    max_sr_allocation.allocation = [round(1 * 100, 0) for i in max_sr_allocation.allocation]
+
+    # Calculate Sharpe Ratio
+    max_sr_sharpe = (max_sr_returns - risk_free_rate) / max_sr_std
+
+    #Print the weights of the tangency portfolio
     print("Tangency Portfolio Weights (Maximum Sharpe Ratio Portfolio):")
-    for stock, weight in zip(meanReturns.index, maxSR_Portfolio['x']):
+    for stock, weight in zip(mean_returns.index, max_sr_portfolio['x']):
         print(f"{stock}: {weight:.4f}")
-
+    
     # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
-    print(f"\nAnnualized Return of the Tangency Portfolio: {maxSR_returns * 100:.2f}%")
-    print(f"Annualized Volatility of the Tangency Portfolio: {maxSR_std * 100:.2f}%")
+    print(f"\nAnnualized Return of the Tangency Portfolio: {max_sr_returns * 100:.2f}%")
+    print(f"Annualized Volatility of the Tangency Portfolio: {max_sr_std * 100:.2f}%")
+    print(f"Sharpe Ratio of the Tangency Portfolio: {max_sr_sharpe:.4f}\n")
 
-    return maxSR_returns, maxSR_std
+    # Min Volatility Portfolio
+    min_vol_portfolio = minimize_variance(mean_returns, cov_matrix)
+    min_vol_returns, min_vol_std = portfolio_performance(min_vol_portfolio['x'], mean_returns, cov_matrix)
+    min_vol_allocation = pd.DataFrame(min_vol_portfolio['x'], index=mean_returns.index, columns=['allocation'])
+    min_vol_allocation.allocation = [round(i * 100, 0) for i in min_vol_allocation.allocation]
 
-def EF_graph(meanReturns, covMatrix, dividendYields, riskFreeRate=0.0462, borrowingRate=0.0, constraintSet=(0, 1)):
-    maxSR_returns, maxSR_std = calculatedResults(meanReturns, covMatrix, dividendYields, riskFreeRate, borrowingRate, constraintSet)
+    # Efficient Frontier
+    efficient_list = []
+    target_returns = np.linspace(min_vol_returns, max_sr_returns, 20)
+    for target in target_returns:
+        efficient_list.append(efficient_opt(mean_returns, cov_matrix, target)['fun'])
 
-    # Input manually defined portfolio weights (user-defined)
-    manual_weights = input("Enter the portfolio weights (comma separated, e.g., '0.6,0.4'): ").split(',')
-    manual_weights = np.array([float(w) for w in manual_weights])  # Convert to numpy array
+    max_sr_returns, max_sr_std = round(max_sr_returns * 100, 2), round(max_sr_std * 100, 2)
+    min_vol_returns, min_vol_std = round(min_vol_returns * 100, 2), round(min_vol_std * 100, 2)
 
-    # Calculate annualized return and volatility for the manually defined portfolio
-    manual_return, manual_volatility = portfolioPerformance(manual_weights, meanReturns, covMatrix, dividendYields)
+    return max_sr_returns, max_sr_std, min_vol_returns, min_vol_std, efficient_list, target_returns
 
-    # Print the results for the manually defined portfolio
-    print(f"\nManually Defined Portfolio:")
+def ef_graph(mean_returns, cov_matrix, risk_free_rate=0.0462):
+    max_sr_returns, max_sr_std, min_vol_returns, min_vol_std, efficient_list, target_returns = calculated_results(mean_returns, cov_matrix, risk_free_rate)
+
+    manual_weights = np.array([float(w) for w in input("Enter the portfolio weights (comma separated, e.g., '0.6,0.4'): ").split(',')])
+    manual_return, manual_volatility = portfolio_performance(manual_weights, mean_returns, cov_matrix)
+
+    manual_sharpe = (manual_return - risk_free_rate) / manual_volatility
+
+    
+    print("\nManually Defined Portfolio:")
     print(f"Annualized Return: {manual_return * 100:.2f}%")
     print(f"Annualized Volatility: {manual_volatility * 100:.2f}%")
+    print(f"Sharpe Ratio of the Manually Defined Portfolio: {manual_sharpe:.4f}\n")
+    
+    tangency_portfolio = go.Scatter(
+        name='Tangency Portfolio',
+        mode='markers',
+        x=[max_sr_std],
+        y=[max_sr_returns],
+        marker=dict(color='red', size=14, line=dict(width=3, color='black'))
+    )
 
-    return maxSR_returns, maxSR_std, manual_return, manual_volatility
+     # Min Vol
+    min_vol = go.Scatter(
+        name='Minimum Volatility',
+        mode='markers',
+        x=[min_vol_std],
+        y=[min_vol_returns],
+        marker=dict(color='green', size=14, line=dict(width=3, color='black'))
+    )
 
-# Start of the main program
+    # Efficient Frontier
+    ef_curve = go.Scatter(
+        name='Efficient Frontier',
+        mode='lines',
+        x=[round(ef_std * 100, 2) for ef_std in efficient_list],
+        y=[round(target * 100, 2) for target in target_returns],
+        line=dict(color='black', width=4, dash='dashdot')
+    )
+
+    # Tangency Line (Capital Market Line)
+    CML_x = np.linspace(0, 100, 500)  # Adjusted to extend the CML
+    CML_y = risk_free_rate * 100 + (max_sr_returns - risk_free_rate * 100) / max_sr_std* CML_x
+    CML = go.Scatter(
+        name='Capital Market Line (CML)',
+        mode='lines',
+        x=CML_x,
+        y=CML_y,
+        line=dict(color='blue', width=2, dash='dash')
+    )
+
+    x_max = max_sr_std* 1.25
+    y_max = max_sr_returns * 1.25
+
+    data = [ef_curve, CML, min_vol, tangency_portfolio]
+
+    layout = go.Layout(
+        title='Portfolio Optimization with the Efficient Frontier',
+        yaxis=dict(title='Annualized Return (%)', range=[0, y_max]),
+        xaxis=dict(title='Annualized Volatility (%)', range=[0, x_max]),
+        showlegend=True,
+        legend=dict(
+            x=0.75, y=0, traceorder='normal',
+            bgcolor='#E2E2E2',
+            bordercolor='black',
+            borderwidth=2),
+        width=1250,
+        height=1250
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    return fig.show()
+
 stock_list = input("Enter the stock tickers (e.g., 'AAPL', 'MSFT', etc.): ").upper().split(',')
-stocks = [stock for stock in stock_list]
+start_date_str = datetime.datetime(1925, 1, 1)
+end_date_str = datetime.datetime(2025, 3, 19)
 
-end_date = dt.datetime.now()
-end_date_str = end_date.strftime('%Y-%m-%d')
-start_date_str = '2007-04-03'
-
-meanReturns, covMatrix = get_data(stocks, start=start_date_str, end=end_date_str)
-
-dividendYields = average_annual_dividend_yield(stocks)
-
-EF_graph(meanReturns, covMatrix, dividendYields)
+mean_returns, cov_matrix = get_data(stock_list, start=start_date_str, end=end_date_str)
+ef_graph(mean_returns, cov_matrix)
