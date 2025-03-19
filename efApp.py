@@ -7,11 +7,38 @@ import plotly.graph_objects as go
 
 # Import data
 def get_data(stocks, start, end):
+    # Download the adjusted closing price data
     stock_data = yf.download(stocks, start=start, end=end, auto_adjust=True)["Close"].dropna(how="all")
+    
+    # Ensure stock_data index is timezone-naive
+    stock_data.index = stock_data.index.tz_localize(None)
+    
+    # Calculate daily returns
     returns = stock_data.pct_change()
+    
+    # Add dividend to returns for specific stocks
+    bond_funds = ["BND", "BNDW", "AGG", "TLT"]
+    for ticker in bond_funds:
+        if ticker in stocks:
+            stock = yf.Ticker(ticker)
+            dividends = stock.dividends  # Get dividends for the specified date range
+            
+            # Ensure dividend data index is timezone-naive
+            dividends.index = dividends.index.tz_localize(None)
+
+            # Iterate through stock_data.index and add dividend where dates match
+            for date in stock_data.index:
+                if date in dividends.index:
+                    # Get the dividend for the date and add it to the return
+                    dividend = dividends.loc[date]
+                    returns.loc[date, ticker] += dividend / stock_data.loc[date, ticker]  # Add dividend yield to return
+            
+    # Calculate mean returns and covariance matrix
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
+    
     return mean_returns, cov_matrix
+
 
 def portfolio_performance(weights, mean_returns, cov_matrix):
     adjusted_returns = np.sum(mean_returns * weights) * 252
