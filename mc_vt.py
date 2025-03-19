@@ -54,7 +54,7 @@ for _ in range(simulations):
 
     for i in range(periods):
         # Simulate returns using a log-normal distribution
-        random_return = np.random.lognormal(mean=biweekly_return, sigma=biweekly_volatility)
+        random_return = np.random.Generator.lognormal(mean=biweekly_return, sigma=biweekly_volatility)
         portfolio_value *= random_return
 
         # Employer match calculation
