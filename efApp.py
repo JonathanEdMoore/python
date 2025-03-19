@@ -31,28 +31,146 @@ def max_sr(mean_returns, cov_matrix, risk_free_rate=0, constraint_set=(0, 1)):
                          method='SLSQP', bounds=bounds, constraints=constraints)
     return result
 
+def portfolio_variance(weights, mean_returns, cov_matrix):
+    return portfolio_performance(weights, mean_returns, cov_matrix)[1]
+
+def minimize_variance(mean_returns, cov_matrix, constraint_set=(0,1)):
+    "Minimize the portfolio variance by altering the weights/allocation of assets in the portfolio"
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix)
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bound = constraint_set
+    bounds = tuple(bound for asset in range(num_assets))
+    result = sc.minimize(portfolio_variance, num_assets * [1. / num_assets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+    
+    return result
+
+def portfolio_return(weights, mean_returns, cov_matrix):
+    return portfolio_performance(weights, mean_returns, cov_matrix)[0]
+
+def efficient_opt(mean_returns, cov_matrix, return_target, constraint_set=(0,1)):
+    """For each returnTarget, we want to optimize the portfolio for min variance"""
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix)
+
+    constraints = ({'type': 'eq', 'fun': lambda x: portfolio_return(x, mean_returns, cov_matrix) - return_target},
+                   {'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bound = constraint_set
+    bounds = tuple(bound for asset in range(num_assets))
+    eff_opt = sc.minimize(portfolio_variance, num_assets * [1. / num_assets], args=args,
+                         method='SLSQP', bounds=bounds, constraints=constraints)
+
+    return eff_opt
+
 def calculated_results(mean_returns, cov_matrix, risk_free_rate=0):
     max_sr_portfolio = max_sr(mean_returns, cov_matrix, risk_free_rate)
     max_sr_returns, max_sr_std = portfolio_performance(max_sr_portfolio['x'], mean_returns, cov_matrix)
+    max_sr_allocation = pd.DataFrame(max_sr_portfolio['x'], index=mean_returns.index, columns=['allocation'])
+    max_sr_allocation.allocation = [round(1 * 100, 0) for i in max_sr_allocation.allocation]
 
+    # Calculate Sharpe Ratio
+    max_sr_sharpe = (max_sr_returns - risk_free_rate) / max_sr_std
+
+    #Print the weights of the tangency portfolio
     print("Tangency Portfolio Weights (Maximum Sharpe Ratio Portfolio):")
     for stock, weight in zip(mean_returns.index, max_sr_portfolio['x']):
         print(f"{stock}: {weight:.4f}")
     
+    # Print the annualized returns, annualized volatility, and Sharpe Ratio as percentages
     print(f"\nAnnualized Return of the Tangency Portfolio: {max_sr_returns * 100:.2f}%")
     print(f"Annualized Volatility of the Tangency Portfolio: {max_sr_std * 100:.2f}%")
-    return max_sr_returns, max_sr_std
+    print(f"Sharpe Ratio of the Tangency Portfolio: {max_sr_sharpe:.4f}\n")
+
+    # Min Volatility Portfolio
+    min_vol_portfolio = minimize_variance(mean_returns, cov_matrix)
+    min_vol_returns, min_vol_std = portfolio_performance(min_vol_portfolio['x'], mean_returns, cov_matrix)
+    min_vol_allocation = pd.DataFrame(min_vol_portfolio['x'], index=mean_returns.index, columns=['allocation'])
+    min_vol_allocation.allocation = [round(i * 100, 0) for i in min_vol_allocation.allocation]
+
+    # Efficient Frontier
+    efficient_list = []
+    target_returns = np.linspace(min_vol_returns, max_sr_returns, 20)
+    for target in target_returns:
+        efficient_list.append(efficient_opt(mean_returns, cov_matrix, target)['fun'])
+
+    max_sr_returns, max_sr_std = round(max_sr_returns * 100, 2), round(max_sr_std * 100, 2)
+    min_vol_returns, min_vol_std = round(min_vol_returns * 100, 2), round(min_vol_std * 100, 2)
+
+    return max_sr_returns, max_sr_std, min_vol_returns, min_vol_std, efficient_list, target_returns
 
 def ef_graph(mean_returns, cov_matrix, risk_free_rate=0.0462):
-    max_sr_returns, max_sr_std = calculated_results(mean_returns, cov_matrix, risk_free_rate)
+    max_sr_returns, max_sr_std, min_vol_returns, min_vol_std, efficient_list, target_returns = calculated_results(mean_returns, cov_matrix, risk_free_rate)
 
     manual_weights = np.array([float(w) for w in input("Enter the portfolio weights (comma separated, e.g., '0.6,0.4'): ").split(',')])
     manual_return, manual_volatility = portfolio_performance(manual_weights, mean_returns, cov_matrix)
+
+    manual_sharpe = (manual_return - risk_free_rate) / manual_volatility
+
     
     print("\nManually Defined Portfolio:")
     print(f"Annualized Return: {manual_return * 100:.2f}%")
     print(f"Annualized Volatility: {manual_volatility * 100:.2f}%")
-    return max_sr_returns, max_sr_std, manual_return, manual_volatility
+    print(f"Sharpe Ratio of the Manually Defined Portfolio: {manual_sharpe:.4f}\n")
+    
+    tangency_portfolio = go.Scatter(
+        name='Tangency Portfolio',
+        mode='markers',
+        x=[max_sr_std],
+        y=[max_sr_returns],
+        marker=dict(color='red', size=14, line=dict(width=3, color='black'))
+    )
+
+     # Min Vol
+    min_vol = go.Scatter(
+        name='Minimum Volatility',
+        mode='markers',
+        x=[min_vol_std],
+        y=[min_vol_returns],
+        marker=dict(color='green', size=14, line=dict(width=3, color='black'))
+    )
+
+    # Efficient Frontier
+    ef_curve = go.Scatter(
+        name='Efficient Frontier',
+        mode='lines',
+        x=[round(ef_std * 100, 2) for ef_std in efficient_list],
+        y=[round(target * 100, 2) for target in target_returns],
+        line=dict(color='black', width=4, dash='dashdot')
+    )
+
+    # Tangency Line (Capital Market Line)
+    CML_x = np.linspace(0, 100, 500)  # Adjusted to extend the CML
+    CML_y = risk_free_rate * 100 + (max_sr_returns - risk_free_rate * 100) / max_sr_std* CML_x
+    CML = go.Scatter(
+        name='Capital Market Line (CML)',
+        mode='lines',
+        x=CML_x,
+        y=CML_y,
+        line=dict(color='blue', width=2, dash='dash')
+    )
+
+    x_max = max_sr_std* 1.25
+    y_max = max_sr_returns * 1.25
+
+    data = [ef_curve, CML, min_vol, tangency_portfolio]
+
+    layout = go.Layout(
+        title='Portfolio Optimization with the Efficient Frontier',
+        yaxis=dict(title='Annualized Return (%)', range=[0, y_max]),
+        xaxis=dict(title='Annualized Volatility (%)', range=[0, x_max]),
+        showlegend=True,
+        legend=dict(
+            x=0.75, y=0, traceorder='normal',
+            bgcolor='#E2E2E2',
+            bordercolor='black',
+            borderwidth=2),
+        width=1250,
+        height=1250
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    return fig.show()
 
 stock_list = input("Enter the stock tickers (e.g., 'AAPL', 'MSFT', etc.): ").upper().split(',')
 start_date_str = datetime.datetime(1925, 1, 1)
