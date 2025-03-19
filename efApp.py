@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
-import datetime as dt
+import datetime
 import yfinance as yf
 import scipy.optimize as sc
 import plotly.graph_objects as go
 
 # Import data
 def get_data(stocks, start, end):
-    stock_data = yf.download(stocks, start=start, end=end, auto_adjust=True)["Close"]
+    stock_data = yf.download(stocks, start=start, end=end, auto_adjust=True)["Close"].dropna(how="all")
     returns = stock_data.pct_change()
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
@@ -55,8 +55,8 @@ def ef_graph(mean_returns, cov_matrix, risk_free_rate=0.0462):
     return max_sr_returns, max_sr_std, manual_return, manual_volatility
 
 stock_list = input("Enter the stock tickers (e.g., 'AAPL', 'MSFT', etc.): ").upper().split(',')
-end_date_str = dt.datetime.now().strftime('%Y-%m-%d')
-start_date_str = '2007-04-03'
+start_date_str = datetime.datetime(1925, 1, 1)
+end_date_str = datetime.datetime(2025, 3, 19)
 
 mean_returns, cov_matrix = get_data(stock_list, start=start_date_str, end=end_date_str)
 ef_graph(mean_returns, cov_matrix)
