@@ -95,11 +95,9 @@ print("\nPercentiles (Dollar Amount):")
 for percentile, value in zip(range(5, 100, 5), percentiles):
     print(f"{percentile}th Percentile: ${value:,.2f}")
 
-# Plot results with improved scaling
-plt.figure(figsize=(10, 6))
-plt.hist(final_values, bins=5000, color='blue', alpha=0.7, label='Final Portfolio Values')
-
-# Vertical lines for mean and median
+# Plot results
+plt.figure(figsize=(12, 6))
+plt.hist(final_values, bins=50, color='blue', alpha=0.7, label='Final Portfolio Values')
 plt.axvline(mean_value, color='r', linestyle='dashed', linewidth=2, label=f'Mean: ${mean_value:,.2f}')
 plt.axvline(median_value, color='g', linestyle='dashed', linewidth=2, label=f'Median: ${median_value:,.2f}')
 
@@ -108,17 +106,21 @@ plt.xlabel("Portfolio Value ($)")
 plt.ylabel("Frequency")
 plt.legend()
 
-# Use logarithmic x-axis to properly space large numbers
-plt.xscale("log")
+# Set x-axis limits to ensure proper spacing
+x_min, x_max = np.percentile(final_values, [1, 99])  # Focus on the central 98% range
+plt.xlim(x_min * 0.9, x_max * 1.1)  # Add padding to the limits
 
-# Adjust x-ticks to readable values (in millions, if necessary)
-xticks = np.geomspace(final_values.min(), final_values.max(), num=6)  # Log-spaced ticks
-plt.xticks(xticks, [f"${x:,.0f}" for x in xticks])  # Format tick labels
+# Set evenly spaced x-ticks
+num_ticks = 10  # Adjust based on spread
+tick_spacing = (x_max - x_min) / num_ticks
+plt.xticks(np.arange(x_min, x_max, tick_spacing), rotation=45)
 
-# Add percentile markers
+# Format x-axis labels
+plt.ticklabel_format(style='plain', axis='x')  # Prevent scientific notation
+
 for percentile, value in zip(range(5, 100, 5), percentiles):
     plt.axvline(value, color='black', linestyle='dotted', linewidth=1)
-    plt.text(value, plt.gca().get_ylim()[1] * 0.02, f"{percentile}th", color='black', ha='center', rotation=90)
+    plt.text(value, plt.gca().get_ylim()[1] * 0.02, f"{percentile}th", color='black', ha='center', rotation=45)
 
 plt.tight_layout()
 plt.show()
