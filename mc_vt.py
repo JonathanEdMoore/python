@@ -40,7 +40,7 @@ initial_salary = 92_760  # Example starting salary
 salary_growth = 1.03  # 3% salary growth per year
 match_percentage = 0.04  # 4% employer match
 periods = 24 * 28  # 8 years of bi-weekly periods
-simulations = 10_000
+simulations = 1_000_000
 
 # Simulate the growth of investment over 8 years
 final_values = []
@@ -95,19 +95,31 @@ print("\nPercentiles (Dollar Amount):")
 for percentile, value in zip(range(5, 100, 5), percentiles):
     print(f"{percentile}th Percentile: ${value:,.2f}")
 
-# Plot results
+# Plot results with improved scaling
 plt.figure(figsize=(10, 6))
-plt.hist(final_values, bins=50, color='blue', alpha=0.7, label='Final Portfolio Values')
+plt.hist(final_values, bins=5000, color='blue', alpha=0.7, label='Final Portfolio Values')
+
+# Vertical lines for mean and median
 plt.axvline(mean_value, color='r', linestyle='dashed', linewidth=2, label=f'Mean: ${mean_value:,.2f}')
 plt.axvline(median_value, color='g', linestyle='dashed', linewidth=2, label=f'Median: ${median_value:,.2f}')
+
 plt.title("Monte Carlo Simulation: Final Portfolio Value (With Contributions & Employer Match)")
 plt.xlabel("Portfolio Value ($)")
 plt.ylabel("Frequency")
 plt.legend()
 
+# Use logarithmic x-axis to properly space large numbers
+plt.xscale("log")
+
+# Adjust x-ticks to readable values (in millions, if necessary)
+xticks = np.geomspace(final_values.min(), final_values.max(), num=6)  # Log-spaced ticks
+plt.xticks(xticks, [f"${x:,.0f}" for x in xticks])  # Format tick labels
+
+# Add percentile markers
 for percentile, value in zip(range(5, 100, 5), percentiles):
     plt.axvline(value, color='black', linestyle='dotted', linewidth=1)
-    plt.text(value + 100, plt.gca().get_ylim()[1] * 0.02, f"{percentile}th", color='black', ha='center')
+    plt.text(value, plt.gca().get_ylim()[1] * 0.02, f"{percentile}th", color='black', ha='center', rotation=90)
 
 plt.tight_layout()
 plt.show()
+
