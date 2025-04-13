@@ -52,15 +52,17 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 # Inputs
 price_of_home = 755_000
 rent = 4_872.18 * 12
-down_payment_percent = 0.20
+down_payment_percent = 1
 down_payment = price_of_home * down_payment_percent
 mortgage_term_years = 15
 property_tax = 0.0189
 hoa = 0.01  # HOA fees
 insurance = 0.005
-cost_of_debt = 0.05507
+cost_of_debt = 0.0675
+cape_ratio = 24
+inflation = 0.02
 expected_return_real_estate = 0.03
-expected_return_stocks = 0.07
+expected_return_stocks = (1/cape_ratio) + inflation
 cost_of_equity = expected_return_stocks - expected_return_real_estate
 
 # PMI rate (example: 0.5% annually)
