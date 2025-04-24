@@ -20,11 +20,12 @@ def pmt(rate, nper, pv, fv=0, when=0):
 
 cape = int(input("Enter the CAPE ratio: "))
 inflation = float(input("Enter the expected inflation rate: "))
-nper = int(input("Enter the number of periods: "))
+num_years = int(input("Enter the number of years: "))
 pv = int(input("Enter the present value: "))
 
 annual_rate = (1/cape) + inflation
 rate = (1 + annual_rate) ** (1/24) - 1
+nper = num_years * 24
 
 payment = pmt(rate, nper, pv)
 print(f"Payment per period: ${payment:.2f}")
