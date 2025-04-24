@@ -50,15 +50,15 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
     return average_wacc, pmi_total  # Return both WACC and total PMI paid
 
 # Inputs
-price_of_home = 755_000
-rent = 4_872.18 * 12
+price_of_home = 1_000_000
+rent = 5_763.99 * 12
 down_payment_percent = 1
 down_payment = price_of_home * down_payment_percent
 mortgage_term_years = 15
 property_tax = 0.0189
 hoa = 0.01  # HOA fees
 insurance = 0.005
-cost_of_debt = 0.0675
+cost_of_debt = 0.05786
 cape_ratio = 21
 inflation = 0.02
 expected_return_real_estate = 0.03
