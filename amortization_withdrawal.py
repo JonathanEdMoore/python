@@ -22,7 +22,7 @@ pe = float(input("Enter the P/E ratio: "))
 target_pe = float(input("Enter the Target P/E ratio: "))
 earnings_growth = float(input("Enter the expected earnings growth: "))
 nper = int(input("Enter the number of periods: "))
-pv = int(input("Enter the present value: "))
+pv = float(input("Enter the present value: "))
 
 valuation_change = (target_pe/pe) ** (1/10) - 1
 annual_rate = (1/pe) + earnings_growth + valuation_change
