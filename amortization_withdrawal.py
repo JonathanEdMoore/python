@@ -18,12 +18,14 @@ def pmt(rate, nper, pv, fv=0, when=0):
     factor = (1 + rate)**nper
     return -(pv * factor + fv) / ((1 + rate * when) * (factor - 1) / rate)
 
-cape = int(input("Enter the CAPE ratio: "))
-inflation = float(input("Enter the expected inflation rate: "))
+pe = float(input("Enter the P/E ratio: "))
+target_pe = float(input("Enter the target P/E ratio: "))
+earnings_growth = float(input("Enter the expected earnings growth: "))
 nper = int(input("Enter the number of periods: "))
 pv = int(input("Enter the present value: "))
 
-annual_rate = (1/cape) + inflation
+valuation_change = (target_pe/pe) ** (1/10) - 1
+annual_rate = (1/pe) + earnings_growth + valuation_change
 rate = (1 + annual_rate) ** (1/24) - 1
 
 payment = pmt(rate, nper, pv)
