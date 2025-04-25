@@ -59,10 +59,12 @@ property_tax = 0.0189
 hoa = 0.01  # HOA fees
 insurance = 0.005
 cost_of_debt = 0.05786
-cape_ratio = 21
-inflation = 0.02
+pe = 19.72
+target_pe = 15
+valuation_change = (target_pe/pe) ** (1/10) - 1
+earnings_growth = 0.06
 expected_return_real_estate = 0.03
-expected_return_stocks = (1/cape_ratio) + inflation
+expected_return_stocks = (1/pe) + earnings_growth + valuation_change
 cost_of_equity = expected_return_stocks - expected_return_real_estate
 
 # PMI rate (example: 0.5% annually)
