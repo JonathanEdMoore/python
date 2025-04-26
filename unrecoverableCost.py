@@ -51,7 +51,7 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 
 # Inputs
 price_of_home = 1_000_000
-rent = 5_763.99 * 12
+rent = 7_022.07 * 12
 down_payment_percent = 1
 down_payment = price_of_home * down_payment_percent
 mortgage_term_years = 15
