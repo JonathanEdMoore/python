@@ -59,8 +59,8 @@ property_tax = 0.0189
 hoa = 0.01  # HOA fees
 insurance = 0.005
 cost_of_debt = 0.05786
-pe = 19.72
-target_pe = 15
+pe = 25
+target_pe = 16
 valuation_change = (target_pe/pe) ** (1/10) - 1
 earnings_growth = 0.06
 expected_return_real_estate = 0.03
@@ -78,6 +78,8 @@ unrecoverable_cost = (average_cost_of_capital + property_tax + hoa + insurance) 
 
 # Outputs
 print(f"Down Payment: ${down_payment:,.2f}")
+print(f"Cost of Debt: {cost_of_debt * 100:.2f}%")
+print(f"Cost of Equity: {cost_of_equity * 100:.2f}%")
 print(f"Total PMI Paid: ${pmi_total:,.2f}")
 print(f"Annual Unrecoverable Costs: ${unrecoverable_cost:,.2f}")
 print(f"Monthly Unrecoverable Costs: ${unrecoverable_cost / 12:,.2f}")
