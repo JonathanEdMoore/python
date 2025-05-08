@@ -18,8 +18,8 @@ def pmt(rate, nper, pv, fv=0, when=0):
     factor = (1 + rate)**nper
     return -(pv * factor + fv) / ((1 + rate * when) * (factor - 1) / rate)
 
-pe = float(input("Enter the P/E ratio: "))
-target_pe = float(input("Enter the Target P/E ratio: "))
+pe = float(input("Enter the CAPE ratio: "))
+target_pe = float(input("Enter the Target CAPE ratio: "))
 earnings_growth = float(input("Enter the expected earnings growth: "))
 nper = int(input("Enter the number of periods: "))
 pv = float(input("Enter the present value: "))
