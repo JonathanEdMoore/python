@@ -39,23 +39,23 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 
 
 # Inputs
-price_of_home = 500_000
+price_of_home = float(input("Enter the price of the home: "))
 rent = 4414.44 * 12
-down_payment_percent = 0.20
-mortgage_term_years = 15
-property_tax = 0.0189
-hoa = 0.02
-insurance = 0.005
-cost_of_debt = 0.05786
-pe = 25
-target_pe = 23
+down_payment_percent = float(input("Enter the down payment percentage: "))
+mortgage_term_years = int(input("Enter the mortgage term years: "))
+property_tax = float(input("Enter the property tax: "))
+hoa = float(input("Enter the HOA/Maintenance rate: "))
+insurance = float(input("Enter the insurance rate: "))
+cost_of_debt = float(input("Enter the mortgage interest rate: "))
+pe = float(input("Enter the CAPE ratio: "))
+target_pe = float(input("Enter the Target CAPE ratio: "))
 valuation_change = (target_pe / pe) ** (1 / 10) - 1
-earnings_growth = 0.06
-expected_return_real_estate = 0.03
+earnings_growth = float(input("Enter the expected earnings growth: "))
+expected_return_real_estate = float(input("Enter the expected return of real estate: "))
 expected_return_stocks = (1 / pe) + earnings_growth + valuation_change
 cost_of_equity = expected_return_stocks - expected_return_real_estate
-pmi_rate = 0.005
-closing_cost_percent = 0.03  # 3% closing costs
+pmi_rate = float(input("Enter the private mortgage insurance rate: "))
+closing_cost_percent = float(input("Enter the closing cost percentage: ")) # 3% closing costs
 
 # Run WACC calculation
 average_cost_of_capital, pmi_total, closing_costs = wacc_with_pmi(
