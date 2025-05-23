@@ -40,7 +40,7 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 
 # Inputs
 price_of_home = float(input("Enter the price of the home: "))
-rent = 4414.44 * 12
+rent = 8900.26 * 12
 down_payment_percent = float(input("Enter the down payment percentage: "))
 mortgage_term_years = int(input("Enter the mortgage term years: "))
 property_tax = float(input("Enter the property tax: "))
