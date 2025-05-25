@@ -137,4 +137,4 @@ print(f"Monthly Rent: ${rent / 12:,.2f}")
 print(f"Estimated Value of Home: ${price_of_home_estimate:,.2f}")
 
 print(f"\nOptimal Down Payment %: {optimal_dp_percent * 100}%")
-print(f"Minimum Unrecoverable Cost: ${min_unrec_cost:,.2f}")
+print(f"Minimum Unrecoverable Cost: ${min_unrec_cost:,.2f}\n")
