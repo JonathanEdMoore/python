@@ -47,8 +47,8 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 
 def unrecoverable_cost_given_down_payment(down_payment_percent, *args):
     price_of_home, cost_of_equity, cost_of_debt, mortgage_term_years, closing_cost_percent, pmi_rate, property_tax, hoa, insurance = args
-    
-    avg_wacc, _, closing_costs, _ = wacc_with_pmi(
+
+    avg_wacc, pmi_total, closing_costs, _ = wacc_with_pmi(
         price_of_home,
         down_payment_percent,
         cost_of_equity,
@@ -58,7 +58,10 @@ def unrecoverable_cost_given_down_payment(down_payment_percent, *args):
         pmi_rate
     )
     
-    unrecoverable_cost = (avg_wacc + property_tax + hoa + insurance) * price_of_home + (closing_costs / mortgage_term_years)
+    unrecoverable_cost = (
+        (avg_wacc + property_tax + hoa + insurance) * price_of_home +
+        (closing_costs + pmi_total) / mortgage_term_years
+    )
     return unrecoverable_cost
 
 def find_optimal_down_payment_percent(price_of_home, cost_of_equity, cost_of_debt, mortgage_term_years, closing_cost_percent, pmi_rate, property_tax, hoa, insurance):
@@ -136,5 +139,6 @@ print(f"\nAnnual Rent: ${rent:,.2f}")
 print(f"Monthly Rent: ${rent / 12:,.2f}")
 print(f"Estimated Value of Home: ${price_of_home_estimate:,.2f}")
 
-print(f"\nOptimal Down Payment %: {optimal_dp_percent * 100}%")
-print(f"Minimum Unrecoverable Cost: ${min_unrec_cost:,.2f}\n")
+print(f"\nOptimal Down Payment %: {optimal_dp_percent * 100:.2f}%")
+print(f"Minimum Annual Unrecoverable Cost: ${min_unrec_cost:,.2f}")
+print(f"Minimum Monthly Unrecoverable Cost: ${min_unrec_cost/12:,.2f}\n")
