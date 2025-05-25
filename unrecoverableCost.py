@@ -40,7 +40,6 @@ def wacc_with_pmi(price_of_home, down_payment_percent, cost_of_equity, cost_of_d
 
 # Inputs
 price_of_home = float(input("Enter the price of the home: "))
-rent = 8900.26 * 12
 down_payment_percent = float(input("Enter the down payment percentage: "))
 mortgage_term_years = int(input("Enter the mortgage term years: "))
 property_tax = float(input("Enter the property tax: "))
@@ -71,6 +70,7 @@ average_cost_of_capital, pmi_total, closing_costs = wacc_with_pmi(
 down_payment = price_of_home * down_payment_percent
 capital_invested = down_payment + closing_costs
 unrecoverable_cost = (average_cost_of_capital + property_tax + hoa + insurance) * price_of_home + (closing_costs / mortgage_term_years)
+rent = unrecoverable_cost
 
 # Outputs
 print(f"Down Payment: ${down_payment:,.2f}")
