@@ -35,9 +35,9 @@ def calculate_total_cost(age_distribution, lump_sums):
     return total_cost
 
 # Parameters
-start_age = 18
-end_age = 19  # Updated to include all ages from 18 to 19
-initial_monthly_payment = 1000
+start_age = 25
+end_age = 100 
+initial_monthly_payment = 500
 annual_rate = 0.03
 inflation_rate = 0.02  # Example annual inflation rate
 

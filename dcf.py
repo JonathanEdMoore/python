@@ -1,37 +1,34 @@
 import numpy as np
 
-def dcf(initial_cash_flow, growth_rate, discount_rate, years, terminal_value_multiple):
-  # Initialize variables
-  cash_flows = []
-  discounted_cash_flows = []
+def dcf_monthly(initial_monthly_cash_flow, annual_growth_rate, annual_discount_rate, years, terminal_value_multiple):
+    # Convert to monthly rates
+    monthly_growth_rate = (1 + annual_growth_rate) ** (1/12) - 1
+    monthly_discount_rate = (1 + annual_discount_rate) ** (1/12) - 1
+    months = years * 12
 
-  # Calculate net cash flows and their present value for each year
-  for year in range(1, years + 1):
-    cash_flow = initial_cash_flow * (1 + growth_rate) ** (year - 1)
-    discounted_cash_flow = cash_flow / (1 + discount_rate) ** year
-    cash_flows.append(cash_flow)
-    discounted_cash_flows.append(discounted_cash_flow)
+    cash_flows = []
+    discounted_cash_flows = []
 
-  # Calculate terminal value (15x the final year's cash flow)
-  terminal_value = cash_flows[-1] * terminal_value_multiple
-  discounted_terminal_value = terminal_value / (1 + discount_rate) ** years
+    # Calculate net cash flows and present values month by month
+    for month in range(1, months + 1):
+        cash_flow = initial_monthly_cash_flow * (1 + monthly_growth_rate) ** (month - 1)
+        discounted_cash_flow = cash_flow / (1 + monthly_discount_rate) ** month
+        cash_flows.append(cash_flow)
+        discounted_cash_flows.append(discounted_cash_flow)
 
-  # Sum the discounted cash flows and the discounted terminal value
-  intrinsic_value = np.sum(discounted_cash_flows) + discounted_terminal_value
+    # Terminal value (multiple of last month’s cash flow)
+    terminal_value = cash_flows[-1] * terminal_value_multiple
+    discounted_terminal_value = terminal_value / (1 + monthly_discount_rate) ** months
 
-  return intrinsic_value
+    intrinsic_value = np.sum(discounted_cash_flows) + discounted_terminal_value
+    return intrinsic_value
 
-# Assumptions
-initial_cash_flow = 19000  # Year 1 net cash flow
-growth_rate = 0.02  # 2% growth rate of cash flow
-discount_rate = 0.07  # 7% discount rate
-years = 30  # Projection period
-terminal_value_multiple = 15  # Multiple of the final year's cash flow
 
-# print(dcf(initial_cash_flow, growth_rate, discount_rate, years, terminal_value_multiple))
+# Example: $500 monthly UBI for 70 years
+monthly_ubi = 500
+growth_rate = 0.025   # annual growth (2%)
+discount_rate = 0.045  # annual discount rate (4.5%)
+years = 75
+terminal_value_multiple = 0  # UBI has no resale value
 
-annual_ubi = 12000
-years = 60
-terminal_value_multiple = 0 # Can't sell the UBI as an asset
-
-print(f"\nUBI Intrinsic value: ${dcf(annual_ubi, growth_rate, discount_rate, years, terminal_value_multiple):,.2f}")
+print(f"\nUBI Intrinsic value: ${dcf_monthly(monthly_ubi, growth_rate, discount_rate, years, terminal_value_multiple):,.2f}")
