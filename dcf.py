@@ -24,7 +24,7 @@ def dcf_monthly(initial_monthly_cash_flow, annual_growth_rate, annual_discount_r
     return intrinsic_value
 
 
-# Example: $500 monthly UBI for 70 years
+# Example: $500 monthly UBI for 75 years
 monthly_ubi = 500
 growth_rate = 0.025   # annual growth (2%)
 discount_rate = 0.045  # annual discount rate (4.5%)
