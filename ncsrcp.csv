@@ -1,0 +1,349 @@
+team,competition,champ_prob
+Oklahoma City Thunder,2025-26 NBA season,0.4166666667
+Denver Nuggets,2025-26 NBA season,0.1333333333
+Houston Rockets,2025-26 NBA season,0.1081081081
+Los Angeles Lakers,2025-26 NBA season,0.1
+Cleveland Cavaliers,2025-26 NBA season,0.06666666667
+New York Knicks,2025-26 NBA season,0.05882352941
+Golden State Warriors,2025-26 NBA season,0.05555555556
+Detroit Pistons,2025-26 NBA season,0.03846153846
+Minnesota Timberwolves,2025-26 NBA season,0.02941176471
+San Antonio Spurs,2025-26 NBA season,0.02941176471
+Orlando Magic,2025-26 NBA season,0.0243902439
+Boston Celtics,2025-26 NBA season,0.01960784314
+Miami Heat,2025-26 NBA season,0.01785714286
+Atlanta Hawks,2025-26 NBA season,0.01639344262
+Philadelphia 76ers,2025-26 NBA season,0.01639344262
+Toronto Raptors,2025-26 NBA season,0.01315789474
+Los Angeles Clippers,2025-26 NBA season,0.01234567901
+Dallas Mavericks,2025-26 NBA season,0.004975124378
+Milwaukee Bucks,2025-26 NBA season,0.004975124378
+Chicago Bulls,2025-26 NBA season,0.003984063745
+Phoenix Suns,2025-26 NBA season,0.001996007984
+Portland Trail Blazers,2025-26 NBA season,0.001248439451
+Brooklyn Nets,2025-26 NBA season,0.000999000999
+Charlotte Hornets,2025-26 NBA season,0.000999000999
+Indiana Pacers,2025-26 NBA season,0.000999000999
+Memphis Grizzlies,2025-26 NBA season,0.000999000999
+New Orleans Pelicans,2025-26 NBA season,0.000999000999
+Sacramento Kings,2025-26 NBA season,0.000999000999
+Utah Jazz,2025-26 NBA season,0.000999000999
+Washington Wizards,2025-26 NBA season,0.000999000999
+Las Vegas Aces,2026 WNBA season,0.2222222222
+Minnesota Lynx,2026 WNBA season,0.2222222222
+Indiana Fever,2026 WNBA season,0.2040816327
+New York Liberty,2026 WNBA season,0.1739130435
+Phoenix Mercury,2026 WNBA season,0.1052631579
+Atlanta Dream,2026 WNBA season,0.05882352941
+Seattle Storm,2026 WNBA season,0.05555555556
+Golden State Valkyries,2026 WNBA season,0.03846153846
+Los Angeles Sparks,2026 WNBA season,0.0243902439
+Dallas Wings,2026 WNBA season,0.02173913043
+Washington Mystics,2026 WNBA season,0.01960784314
+Chicago Sky,2026 WNBA season,0.006622516556
+Connecticut Sun,2026 WNBA season,0.006622516556
+Portland Fire,2026 WNBA season,0.005681818182
+Toronto Tempo,2026 WNBA season,0.005681818182
+Los Angeles Dodgers,2026 MLB season,0.2352941176
+New York Yankees,2026 MLB season,0.125
+Philadelphia Phillies,2026 MLB season,0.08333333333
+New York Mets,2026 MLB season,0.07142857143
+Seattle Mariners,2026 MLB season,0.07142857143
+Toronto Blue Jays,2026 MLB season,0.06896551724
+Houston Astros,2026 MLB season,0.06666666667
+Boston Red Sox,2026 MLB season,0.05882352941
+Atlanta Braves,2026 MLB season,0.05263157895
+San Diego Padres,2026 MLB season,0.05263157895
+Milwaukee Brewers,2026 MLB season,0.04761904762
+Chicago Cubs,2026 MLB season,0.03846153846
+Detroit Tigers,2026 MLB season,0.03703703704
+Cleveland Guardians,2026 MLB season,0.03571428571
+Baltimore Orioles,2026 MLB season,0.03225806452
+Texas Rangers,2026 MLB season,0.03225806452
+San Francisco Giants,2026 MLB season,0.02777777778
+Cincinnati Reds,2026 MLB season,0.0243902439
+Kansas City Royals,2026 MLB season,0.0243902439
+Arizona Diamondbacks,2026 MLB season,0.01960784314
+Tampa Bay Rays,2026 MLB season,0.01960784314
+Athletics,2026 MLB season,0.01234567901
+Minnesota Twins,2026 MLB season,0.01234567901
+St. Louis Cardinals,2026 MLB season,0.01234567901
+Miami Marlins,2026 MLB season,0.00826446281
+Los Angeles Angels,2026 MLB season,0.004975124378
+Pittsburgh Pirates,2026 MLB season,0.004975124378
+Chicago White Sox,2026 MLB season,0.001996007984
+Colorado Rockies,2026 MLB season,0.001996007984
+Washington Nationals,2026 MLB season,0.001996007984
+Los Angeles Rams,2025-26 NFL season,0.1739130435
+Philadelphia Eagles,2025-26 NFL season,0.1
+Green Bay Packers,2025-26 NFL season,0.09523809524
+Seattle Seahawks,2025-26 NFL season,0.09090909091
+Buffalo Bills,2025-26 NFL season,0.08333333333
+New England Patriots,2025-26 NFL season,0.08333333333
+Denver Broncos,2025-26 NFL season,0.06666666667
+Baltimore Ravens,2025-26 NFL season,0.05882352941
+Kansas City Chiefs,2025-26 NFL season,0.05555555556
+Indianapolis Colts,2025-26 NFL season,0.05263157895
+Detroit Lions,2025-26 NFL season,0.04761904762
+San Francisco 49ers,2025-26 NFL season,0.04347826087
+Chicago Bears,2025-26 NFL season,0.03846153846
+Houston Texans,2025-26 NFL season,0.03846153846
+Los Angeles Chargers,2025-26 NFL season,0.03225806452
+Jacksonville Jaguars,2025-26 NFL season,0.02941176471
+Tampa Bay Buccaneers,2025-26 NFL season,0.02702702703
+Cincinnati Bengals,2025-26 NFL season,0.009900990099
+Dallas Cowboys,2025-26 NFL season,0.009900990099
+Pittsburgh Steelers,2025-26 NFL season,0.009900990099
+Carolina Panthers,2025-26 NFL season,0.002493765586
+Miami Dolphins,2025-26 NFL season,0.000999000999
+Atlanta Falcons,2025-26 NFL season,0.0004997501249
+Minnesota Vikings,2025-26 NFL season,0.0004997501249
+Washington Commanders,2025-26 NFL season,0.000399840064
+Cleveland Browns,2025-26 NFL season,0.0003332222592
+Colorado Avalanche,2025-26 NHL season,0.2409638554
+Carolina Hurricanes,2025-26 NHL season,0.1212121212
+Florida Panthers,2025-26 NHL season,0.1052631579
+Tampa Bay Lightning,2025-26 NHL season,0.1052631579
+Vegas Golden Knights,2025-26 NHL season,0.09523809524
+Edmonton Oilers,2025-26 NHL season,0.09090909091
+Dallas Stars,2025-26 NHL season,0.07692307692
+Washington Capitals,2025-26 NHL season,0.05263157895
+New Jersey Devils,2025-26 NHL season,0.03846153846
+Los Angeles Kings,2025-26 NHL season,0.02941176471
+New York Rangers,2025-26 NHL season,0.0243902439
+Ottawa Senators,2025-26 NHL season,0.0243902439
+Toronto Maple Leafs,2025-26 NHL season,0.0243902439
+Anaheim Ducks,2025-26 NHL season,0.02173913043
+Minnesota Wild,2025-26 NHL season,0.01960784314
+Montreal Canadiens,2025-26 NHL season,0.01960784314
+Winnipeg Jets,2025-26 NHL season,0.01960784314
+Utah Mammoth,2025-26 NHL season,0.01492537313
+Detroit Red Wings,2025-26 NHL season,0.01234567901
+St. Louis Blues,2025-26 NHL season,0.009900990099
+Columbus Blue Jackets,2025-26 NHL season,0.007936507937
+New York Islanders,2025-26 NHL season,0.007936507937
+Boston Bruins,2025-26 NHL season,0.006622516556
+Buffalo Sabres,2025-26 NHL season,0.005681818182
+Philadelphia Flyers,2025-26 NHL season,0.005681818182
+Vancouver Canucks,2025-26 NHL season,0.005681818182
+Pittsburgh Penguins,2025-26 NHL season,0.004975124378
+Seattle Kraken,2025-26 NHL season,0.004975124378
+Calgary Flames,2025-26 NHL season,0.003322259136
+Chicago Blackhawks,2025-26 NHL season,0.002493765586
+Nashville Predators,2025-26 NHL season,0.001996007984
+San Jose Sharks,2025-26 NHL season,0.001996007984
+Arsenal,2025-26 UEFA Champions League,0.2325581395
+Bayern Munich,2025-26 UEFA Champions League,0.1666666667
+Paris Saint-Germain,2025-26 UEFA Champions League,0.1428571429
+Manchester City,2025-26 UEFA Champions League,0.1111111111
+Real Madrid,2025-26 UEFA Champions League,0.1111111111
+FC Barcelona,2025-26 UEFA Champions League,0.1
+Liverpool,2025-26 UEFA Champions League,0.09090909091
+Chelsea,2025-26 UEFA Champions League,0.05882352941
+Inter Milan,2025-26 UEFA Champions League,0.03448275862
+Atlético Madrid,2025-26 UEFA Champions League,0.02941176471
+Napoli,2025-26 UEFA Champions League,0.0243902439
+Borussia Dortmund,2025-26 UEFA Champions League,0.01960784314
+Newcastle United,2025-26 UEFA Champions League,0.01960784314
+Tottenham Hotspur,2025-26 UEFA Champions League,0.01960784314
+Bayer Leverkusen,2025-26 UEFA Champions League,0.01515151515
+Atalanta,2025-26 UEFA Champions League,0.009900990099
+Galatasaray,2025-26 UEFA Champions League,0.009900990099
+PSV Eindhoven,2025-26 UEFA Champions League,0.009900990099
+Sporting CP,2025-26 UEFA Champions League,0.009900990099
+Juventus,2025-26 UEFA Champions League,0.006622516556
+Marseille,2025-26 UEFA Champions League,0.006622516556
+Monaco,2025-26 UEFA Champions League,0.006622516556
+Athletic Bilbao,2025-26 UEFA Champions League,0.003984063745
+Eintracht Frankfurt,2025-26 UEFA Champions League,0.003984063745
+Villarreal,2025-26 UEFA Champions League,0.002849002849
+Club Brugge,2025-26 UEFA Champions League,0.001996007984
+Olympiakos,2025-26 UEFA Champions League,0.001996007984
+Benfica,2025-26 UEFA Champions League,0.001331557923
+Bode/Glimt,2025-26 UEFA Champions League,0.000999000999
+Qarabag FK,2025-26 UEFA Champions League,0.000999000999
+Union Saint-Gilloise,2025-26 UEFA Champions League,0.000999000999
+Ajax,2025-26 UEFA Champions League,0.0006662225183
+FC Copenhagen,2025-26 UEFA Champions League,0.0006662225183
+Pafos FC,2025-26 UEFA Champions League,0.0006662225183
+Slavia Prague,2025-26 UEFA Champions League,0.0006662225183
+Kairat Almaty,2025-26 UEFA Champions League,0.0003332222592
+Spain,2026 FIFA World Cup,0.1818181818
+England,2026 FIFA World Cup,0.1428571429
+France,2026 FIFA World Cup,0.125
+Brazil,2026 FIFA World Cup,0.1111111111
+Argentina,2026 FIFA World Cup,0.1
+Portugal,2026 FIFA World Cup,0.08333333333
+Germany,2026 FIFA World Cup,0.07692307692
+Netherlands,2026 FIFA World Cup,0.04761904762
+Norway,2026 FIFA World Cup,0.04347826087
+Italy,2026 FIFA World Cup,0.02777777778
+Belgium,2026 FIFA World Cup,0.01960784314
+Colombia,2026 FIFA World Cup,0.01960784314
+Uruguay,2026 FIFA World Cup,0.01639344262
+USA,2026 FIFA World Cup,0.01315789474
+Ecuador,2026 FIFA World Cup,0.01234567901
+Mexico,2026 FIFA World Cup,0.01234567901
+Morocco,2026 FIFA World Cup,0.01234567901
+Croatia,2026 FIFA World Cup,0.009900990099
+Japan,2026 FIFA World Cup,0.009900990099
+Senegal,2026 FIFA World Cup,0.009900990099
+Switzerland,2026 FIFA World Cup,0.009900990099
+Austria,2026 FIFA World Cup,0.006622516556
+Denmark,2026 FIFA World Cup,0.006622516556
+Ghana,2026 FIFA World Cup,0.006622516556
+Paraguay,2026 FIFA World Cup,0.006622516556
+South Korea,2026 FIFA World Cup,0.006622516556
+Sweden,2026 FIFA World Cup,0.006622516556
+Algeria,2026 FIFA World Cup,0.004975124378
+Ukraine,2026 FIFA World Cup,0.004975124378
+Canada,2026 FIFA World Cup,0.003984063745
+Egypt,2026 FIFA World Cup,0.003984063745
+Poland,2026 FIFA World Cup,0.003984063745
+Scotland,2026 FIFA World Cup,0.003984063745
+Turkey,2026 FIFA World Cup,0.003984063745
+Wales,2026 FIFA World Cup,0.003984063745
+Bosnia & Herzegovina,2026 FIFA World Cup,0.003322259136
+Tunisia,2026 FIFA World Cup,0.002493765586
+Australia,2026 FIFA World Cup,0.001996007984
+Czech Republic,2026 FIFA World Cup,0.001996007984
+Iran,2026 FIFA World Cup,0.001996007984
+North Macedonia,2026 FIFA World Cup,0.001996007984
+Romania,2026 FIFA World Cup,0.001996007984
+Slovakia,2026 FIFA World Cup,0.001996007984
+South Africa,2026 FIFA World Cup,0.001996007984
+Northern Ireland,2026 FIFA World Cup,0.001331557923
+Panama,2026 FIFA World Cup,0.001331557923
+Jamaica,2026 FIFA World Cup,0.000999000999
+New Zealand,2026 FIFA World Cup,0.000999000999
+Qatar,2026 FIFA World Cup,0.000999000999
+Republic of Ireland,2026 FIFA World Cup,0.000999000999
+Saudi Arabia,2026 FIFA World Cup,0.000999000999
+United Arab Emirates,2026 FIFA World Cup,0.000999000999
+Barcelona,2025-26 UEFA Women's Champions League,0.619047619
+Chelsea,2025-26 UEFA Women's Champions League,0.1818181818
+OL Lyonnes,2025-26 UEFA Women's Champions League,0.1428571429
+Arsenal,2025-26 UEFA Women's Champions League,0.07692307692
+Wolfsburg,2025-26 UEFA Women's Champions League,0.05882352941
+Bayern Munich,2025-26 UEFA Women's Champions League,0.05882352941
+Manchester United,2025-26 UEFA Women's Champions League,0.04761904762
+Real Madrid,2025-26 UEFA Women's Champions League,0.03846153846
+Juventus,2025-26 UEFA Women's Champions League,0.01492537313
+Paris FC,2025-26 UEFA Women's Champions League,0.009900990099
+Atlético Madrid,2025-26 UEFA Women's Champions League,0.009900990099
+Paris Saint-Germain,2025-26 UEFA Women's Champions League,0.003984063745
+Roma,2025-26 UEFA Women's Champions League,0.001996007984
+Benfica,2025-26 UEFA Women's Champions League,0.001996007984
+OH Leuven,2025-26 UEFA Women's Champions League,0.001996007984
+Valerenga,2025-26 UEFA Women's Champions League,0.001331557923
+FC Twente,2025-26 UEFA Women's Champions League,0.000999000999
+St Polten,2025-26 UEFA Women's Champions League,0.000399840064
+Michigan,2025-26 NCAA Division I men's basketball,0.1176470588
+Purdue,2025-26 NCAA Division I men's basketball,0.1
+Duke,2025-26 NCAA Division I men's basketball,0.09090909091
+Houston,2025-26 NCAA Division I men's basketball,0.07692307692
+UConn,2025-26 NCAA Division I men's basketball,0.07692307692
+Gonzaga,2025-26 NCAA Division I men's basketball,0.0625
+Louisville,2025-26 NCAA Division I men's basketball,0.05882352941
+Arizona,2025-26 NCAA Division I men's basketball,0.05555555556
+Illinois,2025-26 NCAA Division I men's basketball,0.04761904762
+Iowa State,2025-26 NCAA Division I men's basketball,0.04347826087
+BYU,2025-26 NCAA Division I men's basketball,0.04347826087
+St. Johns,2025-26 NCAA Division I men's basketball,0.04347826087
+Kentucky,2025-26 NCAA Division I men's basketball,0.03846153846
+Kansas,2025-26 NCAA Division I men's basketball,0.03846153846
+Alabama,2025-26 NCAA Division I men's basketball,0.03846153846
+Florida,2025-26 NCAA Division I men's basketball,0.03448275862
+Michigan State,2025-26 NCAA Division I men's basketball,0.03225806452
+Tennessee,2025-26 NCAA Division I men's basketball,0.03225806452
+North Carolina,2025-26 NCAA Division I men's basketball,0.02777777778
+UCLA,2025-26 NCAA Division I men's basketball,0.0243902439
+Texas Tech,2025-26 NCAA Division I men's basketball,0.0243902439
+Arkansas,2025-26 NCAA Division I men's basketball,0.01960784314
+Vanderbilt,2025-26 NCAA Division I men's basketball,0.01960784314
+NC State,2025-26 NCAA Division I men's basketball,0.01408450704
+Indiana,2025-26 NCAA Division I men's basketball,0.01315789474
+Baylor,2025-26 NCAA Division I men's basketball,0.01315789474
+Wisconsin,2025-26 NCAA Division I men's basketball,0.01315789474
+Iowa,2025-26 NCAA Division I men's basketball,0.009900990099
+Auburn,2025-26 NCAA Division I men's basketball,0.009900990099
+Virginia,2025-26 NCAA Division I men's basketball,0.009900990099
+Villanova,2025-26 NCAA Division I men's basketball,0.009900990099
+USC,2025-26 NCAA Division I men's basketball,0.009900990099
+Texas A&M,2025-26 NCAA Division I men's basketball,0.009900990099
+Oregon,2025-26 NCAA Division I men's basketball,0.009900990099
+Ole Miss,2025-26 NCAA Division I men's basketball,0.009900990099
+Ohio State,2025-26 NCAA Division I men's basketball,0.009900990099
+Missouri,2025-26 NCAA Division I men's basketball,0.00826446281
+Clemson,2025-26 NCAA Division I men's basketball,0.00826446281
+Texas,2025-26 NCAA Division I men's basketball,0.00826446281
+Syracuse,2025-26 NCAA Division I men's basketball,0.00826446281
+SMU,2025-26 NCAA Division I men's basketball,0.00826446281
+Georgia,2025-26 NCAA Division I men's basketball,0.007633587786
+LSU,2025-26 NCAA Division I men's basketball,0.006622516556
+Creighton,2025-26 NCAA Division I men's basketball,0.006622516556
+Xavier,2025-26 NCAA Division I men's basketball,0.006622516556
+Wake Forest,2025-26 NCAA Division I men's basketball,0.006622516556
+Miami FL,2025-26 NCAA Division I men's basketball,0.005524861878
+Washington,2025-26 NCAA Division I men's basketball,0.005524861878
+TCU,2025-26 NCAA Division I men's basketball,0.005524861878
+Marquette,2025-26 NCAA Division I men's basketball,0.004975124378
+Cincinnati,2025-26 NCAA Division I men's basketball,0.004975124378
+Virginia Tech,2025-26 NCAA Division I men's basketball,0.004975124378
+San Diego State,2025-26 NCAA Division I men's basketball,0.004975124378
+Oklahoma,2025-26 NCAA Division I men's basketball,0.004975124378
+Kansas State,2025-26 NCAA Division I men's basketball,0.003984063745
+Florida State,2025-26 NCAA Division I men's basketball,0.003984063745
+Butler,2025-26 NCAA Division I men's basketball,0.003984063745
+Arizona State,2025-26 NCAA Division I men's basketball,0.003984063745
+West Virginia,2025-26 NCAA Division I men's basketball,0.003984063745
+Seton Hall,2025-26 NCAA Division I men's basketball,0.003984063745
+Saint Marys,2025-26 NCAA Division I men's basketball,0.003984063745
+Notre Dame,2025-26 NCAA Division I men's basketball,0.003984063745
+New Mexico,2025-26 NCAA Division I men's basketball,0.003322259136
+Mississippi State,2025-26 NCAA Division I men's basketball,0.003322259136
+Memphis,2025-26 NCAA Division I men's basketball,0.003322259136
+Maryland,2025-26 NCAA Division I men's basketball,0.003322259136
+Georgetown,2025-26 NCAA Division I men's basketball,0.003322259136
+VCU,2025-26 NCAA Division I men's basketball,0.003322259136
+Utah State,2025-26 NCAA Division I men's basketball,0.003322259136
+Providence,2025-26 NCAA Division I men's basketball,0.003322259136
+Oklahoma State,2025-26 NCAA Division I men's basketball,0.003322259136
+Nebraska,2025-26 NCAA Division I men's basketball,0.002493765586
+Dayton,2025-26 NCAA Division I men's basketball,0.002493765586
+Northwestern,2025-26 NCAA Division I men's basketball,0.001996007984
+Minnesota,2025-26 NCAA Division I men's basketball,0.001996007984
+Georgia Tech,2025-26 NCAA Division I men's basketball,0.001996007984
+DePaul,2025-26 NCAA Division I men's basketball,0.001996007984
+Colorado State,2025-26 NCAA Division I men's basketball,0.001996007984
+Colorado,2025-26 NCAA Division I men's basketball,0.001996007984
+California,2025-26 NCAA Division I men's basketball,0.001996007984
+Boston College,2025-26 NCAA Division I men's basketball,0.001996007984
+Boise State,2025-26 NCAA Division I men's basketball,0.001996007984
+Utah,2025-26 NCAA Division I men's basketball,0.001996007984
+UCF,2025-26 NCAA Division I men's basketball,0.001996007984
+Stanford,2025-26 NCAA Division I men's basketball,0.001996007984
+South Carolina,2025-26 NCAA Division I men's basketball,0.001996007984
+Rutgers,2025-26 NCAA Division I men's basketball,0.001996007984
+Pittsburgh,2025-26 NCAA Division I men's basketball,0.001996007984
+Penn State,2025-26 NCAA Division I men's basketball,0.001996007984
+Troy,2025-26 NCAA Division I men's basketball,0.000999000999
+LSU,2026 NCAA Division I baseball,0.1818181818
+Arkansas,2026 NCAA Division I baseball,0.1666666667
+Tennessee,2026 NCAA Division I baseball,0.1111111111
+Georgia,2026 NCAA Division I baseball,0.09090909091
+Texas,2026 NCAA Division I baseball,0.05882352941
+North Carolina,2026 NCAA Division I baseball,0.05882352941
+Clemson,2026 NCAA Division I baseball,0.05263157895
+Oregon State,2026 NCAA Division I baseball,0.04761904762
+Vanderbilt,2026 NCAA Division I baseball,0.04347826087
+Geogria Tech,2026 NCAA Division I baseball,0.04347826087
+Florida State,2026 NCAA Division I baseball,0.03846153846
+Alabama,2026 NCAA Division I baseball,0.02777777778
+Wake Forest,2026 NCAA Division I baseball,0.02777777778
+UC-Irvine,2026 NCAA Division I baseball,0.02777777778
+Texas A&M,2026 NCAA Division I baseball,0.02777777778
+Auburn,2026 NCAA Division I baseball,0.0243902439
+Oregon,2026 NCAA Division I baseball,0.02173913043
+Mississippi,2026 NCAA Division I baseball,0.01960784314
+UCLA,2026 NCAA Division I baseball,0.01960784314
