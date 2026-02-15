@@ -24,6 +24,6 @@ pv = float(input("Enter the present value: "))
 
 rate = (1 + annual_rate) ** (1/24) - 1
 
-payment = pmt(rate, nper, pv)
-print(f"\nPayment per period: ${payment:,.2f}")
+payment = -pmt(rate, nper, pv)
+print(f"\nWithdrawal per period: ${payment:,.2f}")
 print(f"Annual Return: {annual_rate * 100:.2f}%")
