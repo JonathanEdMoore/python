@@ -1,0 +1,131 @@
+import numpy as np
+import pandas as pd
+import yfinance as yf
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+
+# -----------------------------
+# User inputs
+# -----------------------------
+tickers = ["VT", "AVUV", "AVDV"]
+start_date = "2018-01-01"
+end_date = None            # None = today
+risk_free_rate = 0.02      # annual risk-free rate
+
+# -----------------------------
+# Single yfinance call (NO looping)
+# -----------------------------
+prices = yf.download(
+    tickers,
+    start=start_date,
+    end=end_date,
+    auto_adjust=True,
+    threads=False,
+    group_by="ticker"
+)
+
+# Extract adjusted close
+if isinstance(prices.columns, pd.MultiIndex):
+    prices = prices.loc[:, (slice(None), "Close")]
+    prices.columns = prices.columns.droplevel(1)
+else:
+    prices = prices["Close"]
+
+# -----------------------------
+# Compute returns
+# -----------------------------
+returns = prices.pct_change().dropna()
+
+mean_returns = returns.mean() * 252
+cov_matrix = returns.cov() * 252
+
+# -----------------------------
+# Portfolio statistics
+# -----------------------------
+def portfolio_performance(weights, mean_returns, cov_matrix, rf):
+    ret = np.dot(weights, mean_returns)
+    vol = np.sqrt(weights.T @ cov_matrix @ weights)
+    sharpe = (ret - rf) / vol
+    return ret, vol, sharpe
+
+# -----------------------------
+# Tangency portfolio
+# -----------------------------
+def negative_sharpe(weights, mean_returns, cov_matrix, rf):
+    return -portfolio_performance(weights, mean_returns, cov_matrix, rf)[2]
+
+num_assets = len(tickers)
+init_weights = np.ones(num_assets) / num_assets
+
+constraints = {"type": "eq", "fun": lambda w: np.sum(w) - 1}
+bounds = tuple((0, 1) for _ in range(num_assets))
+
+opt = minimize(
+    negative_sharpe,
+    init_weights,
+    args=(mean_returns, cov_matrix, risk_free_rate),
+    method="SLSQP",
+    bounds=bounds,
+    constraints=constraints
+)
+
+tangency_weights = opt.x
+tangency_return, tangency_vol, tangency_sharpe = portfolio_performance(
+    tangency_weights, mean_returns, cov_matrix, risk_free_rate
+)
+
+# -----------------------------
+# Efficient frontier simulation
+# -----------------------------
+num_ports = 50_000
+results = np.zeros((3, num_ports))
+
+for i in range(num_ports):
+    w = np.random.random(num_assets)
+    w /= w.sum()
+
+    ret, vol, sharpe = portfolio_performance(
+        w, mean_returns, cov_matrix, risk_free_rate
+    )
+
+    results[:, i] = [vol, ret, sharpe]
+
+# -----------------------------
+# Plot
+# -----------------------------
+plt.figure(figsize=(10, 7))
+plt.scatter(
+    results[0],
+    results[1],
+    c=results[2],
+    cmap="viridis",
+    alpha=0.3
+)
+plt.colorbar(label="Sharpe Ratio")
+
+plt.scatter(
+    tangency_vol,
+    tangency_return,
+    color="red",
+    marker="*",
+    s=300,
+    label="Tangency Portfolio"
+)
+
+plt.xlabel("Annualized Volatility")
+plt.ylabel("Annualized Return")
+plt.title("Efficient Frontier with Tangency Portfolio")
+plt.legend()
+plt.show()
+
+# -----------------------------
+# Output
+# -----------------------------
+weights = pd.Series(tangency_weights, index=tickers, name="Weight")
+
+print("\nTangency Portfolio Weights")
+print(weights.round(4))
+
+print(f"\nExpected Return: {tangency_return:.2%}")
+print(f"Volatility: {tangency_vol:.2%}")
+print(f"Sharpe Ratio: {tangency_sharpe:.2f}")
